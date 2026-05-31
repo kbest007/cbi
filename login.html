@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Controle de Banca Inteligente</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body{
+background:#020617;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+overflow:hidden;
+}
+
+.glow{
+position:fixed;
+width:700px;
+height:700px;
+background:#4f46e5;
+opacity:.15;
+filter:blur(180px);
+border-radius:50%;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+}
+
+.card{
+width:100%;
+max-width:420px;
+background:rgba(15,23,42,.85);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.06);
+border-radius:30px;
+padding:35px;
+position:relative;
+z-index:2;
+}
+
+.logo{
+width:90px;
+height:90px;
+border-radius:25px;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:900;
+color:white;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+}
+
+h1{
+margin-top:20px;
+text-align:center;
+color:white;
+font-size:28px;
+font-weight:900;
+}
+
+.subtitle{
+text-align:center;
+color:#94a3b8;
+margin-top:10px;
+margin-bottom:30px;
+}
+
+.input{
+width:100%;
+background:#0f172a;
+border:1px solid rgba(255,255,255,.08);
+padding:15px;
+border-radius:14px;
+color:white;
+margin-bottom:14px;
+font-size:14px;
+}
+
+.input:focus{
+outline:none;
+border-color:#6366f1;
+box-shadow:0 0 0 4px rgba(99,102,241,.15);
+}
+
+.btn{
+width:100%;
+padding:15px;
+border:none;
+border-radius:14px;
+cursor:pointer;
+font-weight:700;
+font-size:15px;
+color:white;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+}
+
+.btn:hover{
+opacity:.95;
+}
+
+.link{
+background:none;
+border:none;
+cursor:pointer;
+color:#818cf8;
+font-size:14px;
+}
+
+.link:hover{
+color:#a5b4fc;
+}
+
+.center{
+text-align:center;
+margin-top:18px;
+}
+
+.hidden{
+display:none;
+}
+
+.alert{
+padding:12px;
+border-radius:12px;
+font-size:14px;
+margin-bottom:15px;
+display:none;
+}
+
+.error{
+background:#450a0a;
+color:#fca5a5;
+}
+
+.success{
+background:#052e16;
+color:#86efac;
+}
+
+.version{
+margin-top:25px;
+padding-top:20px;
+border-top:1px solid rgba(255,255,255,.05);
+text-align:center;
+font-size:12px;
+color:#64748b;
+}
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+
+<div class="card">
+
+<div class="logo">
+CBI
+</div>
+
+<h1>Controle de Banca Inteligente</h1>
+
+<p class="subtitle">Bem-vindo de volta</p>
+
+<div id="msg" class="alert"></div>
+
+<!-- LOGIN -->
+
+<div id="loginBox">
+
+<input id="loginEmail" class="input" type="email" placeholder="Email">
+
+<input id="loginPassword" class="input" type="password" placeholder="Senha">
+
+<button class="btn" onclick="login()">
+Entrar
+</button>
+
+<div class="center">
+<button class="link" onclick="abrirRecuperacao()">
+Esqueceu a senha?
+</button>
+</div>
+
+<div class="center">
+<button class="link" onclick="abrirCadastro()">
+Criar conta
+</button>
+</div>
+
+</div>
+
+<!-- CADASTRO -->
+
+<div id="registerBox" class="hidden">
+
+<input id="registerName" class="input" placeholder="Nome">
+
+<input id="registerEmail" class="input" type="email" placeholder="Email">
+
+<input id="registerPassword" class="input" type="password" placeholder="Senha">
+
+<button class="btn" onclick="registrar()">
+Criar Conta
+</button>
+
+<div class="center">
+<button class="link" onclick="abrirLogin()">
+Voltar ao Login
+</button>
+</div>
+
+</div>
+
+<!-- RECUPERAR -->
+
+<div id="forgotBox" class="hidden">
+
+<input id="forgotEmail" class="input" type="email" placeholder="Seu email">
+
+<button class="btn" onclick="recuperarSenha()">
+Enviar Link
+</button>
+
+<div class="center">
+<button class="link" onclick="abrirLogin()">
+Voltar ao Login
+</button>
+</div>
+
+</div>
+
+<div class="version">
+Versão 1.0
+</div>
+
+</div>
+
+<script type="module">
+
+import { createClient }
+from 'https://esm.sh/@supabase/supabase-js'
+
+const supabase = createClient(
+'https://tjzcgfjdhunqfifxgyyy.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg'
+)
+
+window.abrirCadastro = () => {
+loginBox.classList.add('hidden')
+forgotBox.classList.add('hidden')
+registerBox.classList.remove('hidden')
+}
+
+window.abrirRecuperacao = () => {
+loginBox.classList.add('hidden')
+registerBox.classList.add('hidden')
+forgotBox.classList.remove('hidden')
+}
+
+window.abrirLogin = () => {
+registerBox.classList.add('hidden')
+forgotBox.classList.add('hidden')
+loginBox.classList.remove('hidden')
+}
+
+function mensagem(texto,tipo){
+
+const msg = document.getElementById('msg')
+
+msg.style.display='block'
+msg.className='alert '+tipo
+msg.innerHTML=texto
+
+}
+
+window.login = async () => {
+
+const email = loginEmail.value
+const password = loginPassword.value
+
+const { error } =
+await supabase.auth.signInWithPassword({
+email,
+password
+})
+
+if(error){
+mensagem(error.message,'error')
+return
+}
+
+mensagem('Login realizado com sucesso!','success')
+
+setTimeout(()=>{
+window.location.href='dashboard.html'
+},1000)
+
+}
+
+window.registrar = async () => {
+
+const email = registerEmail.value
+const password = registerPassword.value
+
+const { error } =
+await supabase.auth.signUp({
+email,
+password
+})
+
+if(error){
+mensagem(error.message,'error')
+return
+}
+
+mensagem(
+'Conta criada com sucesso. Verifique seu email.',
+'success'
+)
+
+abrirLogin()
+
+}
+
+window.recuperarSenha = async () => {
+
+const email = forgotEmail.value
+
+const { error } =
+await supabase.auth.resetPasswordForEmail(email)
+
+if(error){
+mensagem(error.message,'error')
+return
+}
+
+mensagem(
+'Link enviado para seu email.',
+'success'
+)
+
+}
+
+const { data } = await supabase.auth.getSession()
+
+if(data.session){
+window.location.href='dashboard.html'
+}
+
+</script>
+
+</body>
+</html>

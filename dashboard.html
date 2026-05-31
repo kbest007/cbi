@@ -63,7 +63,7 @@ body{
     text-transform:uppercase;
 }
 
-/* NOVA BARRA DE NAVEGAÇÃO PROFISSIONAL */
+/* BARRA DE NAVEGAÇÃO PROFISSIONAL */
 .nav-links {
     display: flex;
     gap: 12px;
@@ -91,6 +91,12 @@ body{
     border-color: rgba(79, 70, 229, 0.3);
 }
 
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .user {
     background:#0f172a;
     border:1px solid rgba(255,255,255,.05);
@@ -99,6 +105,24 @@ body{
     font-size:13px;
     font-weight: 500;
 }
+
+.btn-sair {
+    padding: 12px 18px;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: #ef4444;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-sair:hover {
+    background: #dc2626;
+    color: white;
+}
+
 .container{
     max-width:1400px;
     margin:auto;
@@ -184,9 +208,25 @@ body{
 .history-item:last-of-type {
     border-bottom: none;
 }
-.logout{
+.logout-panel{
     margin-top:20px;
-    background:#dc2626;
+    background: transparent;
+    border: 1px solid #dc2626;
+    color: #ef4444;
+}
+.logout-panel:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.input-gestao {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: #0f172a;
+    color: white;
+    font-size: 14px;
 }
 
 @media(max-width:900px){
@@ -218,7 +258,10 @@ body{
         <a href="relatorios.html" class="nav-item">📈 Relatórios & Analytics</a>
     </nav>
 
-    <div class="user">Usuário Master</div>
+    <div class="user-area">
+        <div class="user">Usuário Master</div>
+        <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
 </header>
 
 <div class="container">
@@ -297,8 +340,20 @@ body{
     <div class="main">
 
         <div class="panel">
-            <h3>Painel de Lançamento</h3>
-            <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;line-height:1.5;">
+            <h3>Gestão Financeira & Lançamentos</h3>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="number" id="inputBancaInicial" class="input-gestao" placeholder="Definir Banca Inicial (Ex: 1000)">
+                <button onclick="salvarBancaInicial()" style="padding:14px 20px; background:#3b82f6; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;">Atualizar Banca</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                <input type="number" id="valorMovimentacao" class="input-gestao" placeholder="Valor para Aporte ou Saque (R$)">
+                <button onclick="gerenciarBanca('aporte')" style="padding:14px 20px; background:#00e5a0; color:#020617; border:none; border-radius:12px; cursor:pointer; font-weight:700;">+ Aporte</button>
+                <button onclick="gerenciarBanca('saque')" style="padding:14px 20px; background:#ff4d6d; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:700;">- Saque</button>
+            </div>
+
+            <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;line-height:1.5; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
                 Inicie a calculadora de cobertura para registrar sua nova operação com múltiplos tiros ou distribuição automática em mercados opcionais.
             </p>
             <button class="button" onclick="window.location.href='nova-operacao.html'">＋ Iniciar Nova Operação</button>
@@ -311,14 +366,64 @@ body{
                 <p style="color:#94a3b8;font-size:13px;padding:15px 0;">Nenhuma operação registrada no sistema.</p>
             </div>
 
-            <button class="button logout" onclick="logout()">Zerar Banco Local & Sair</button>
+            <button class="button logout-panel" onclick="logout()">Zerar Dados do Painel</button>
         </div>
 
-    </div></div><script>
-function logout(){
-    if(confirm('Isso limpará todo o histórico de operações salvas localmente. Continuar?')){
-        localStorage.clear();
+    </div>
+</div>
+
+<script>
+// NOVAS FUNÇÕES DE GESTÃO DE BANCA
+function salvarBancaInicial() {
+    let valor = document.getElementById('inputBancaInicial').value;
+    if(valor) {
+        localStorage.setItem('bancaInicial', valor);
         location.reload();
+    } else {
+        alert('Por favor, informe um valor válido para a banca inicial.');
+    }
+}
+
+function gerenciarBanca(tipo) {
+    let valor = parseFloat(document.getElementById('valorMovimentacao').value);
+    if (isNaN(valor) || valor <= 0) {
+        return alert("Por favor, digite um valor válido maior que zero.");
+    }
+    
+    let operacoes = JSON.parse(localStorage.getItem('operacoes') || '[]');
+    
+    operacoes.push({
+        descricao: tipo === 'aporte' ? 'Aporte de Capital' : 'Saque de Capital',
+        resultadoFinal: tipo === 'aporte' ? valor : -valor,
+        resultadoPrincipal: 0,
+        resultadoOpcionais: 0,
+        tiro: tipo === 'aporte' ? 'Aporte' : 'Saque',
+        data: new Date().toISOString()
+    });
+    
+    localStorage.setItem('operacoes', JSON.stringify(operacoes));
+    document.getElementById('valorMovimentacao').value = '';
+    calcularEAtualizarDashboard();
+}
+
+// FUNÇÃO LOGOUT CORRIGIDA
+function logout() {
+    if(confirm('Tem certeza de que deseja sair? O sistema será encerrado e os dados locais serão apagados.')){
+        // 1. Limpa os dados do banco local
+        localStorage.clear();
+
+        // 2. Substitui a tela pela mensagem de encerramento
+        document.body.innerHTML = `
+            <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #020617; color: white; font-family: 'Inter', sans-serif;">
+                <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 10px;">Sistema Encerrado</h2>
+                <p style="color: #94a3b8; font-size: 16px;">Redirecionando para login em 2 segundos...</p>
+            </div>
+        `;
+
+        // 3. Aguarda 2 segundos e redireciona
+        setTimeout(function() {
+            window.location.href = 'login.html'; 
+        }, 2000);
     }
 }
 
@@ -329,10 +434,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function calcularEAtualizarDashboard() {
     try {
-        // Recupera dados salvos pela tela 'nova-operacao.html'
         const operacoes = JSON.parse(localStorage.getItem('operacoes') || '[]');
+        let bancaSalva = localStorage.getItem('bancaInicial');
+        let BANCA_INICIAL = bancaSalva ? parseFloat(bancaSalva) : 0.00;
         
-        let BANCA_INICIAL = 5000.00; // Banca base padrão caso queira calcular evolução real
+        if(document.getElementById('inputBancaInicial')) {
+            document.getElementById('inputBancaInicial').placeholder = "Banca Atual: R$ " + BANCA_INICIAL.toFixed(2);
+        }
+
         let lucroTotal = 0;
         let green1 = 0;
         let green2 = 0;
@@ -341,40 +450,37 @@ function calcularEAtualizarDashboard() {
         let reembolsos = 0;
         let resPrincipal = 0;
         let resOpcionais = 0;
+        let operacoesValidasBet = 0;
         
-        // Loop consolidador de métricas
         operacoes.forEach(function(op) {
             lucroTotal += op.resultadoFinal || 0;
             resPrincipal += op.resultadoPrincipal || 0;
             resOpcionais += op.resultadoOpcionais || 0;
             
-            if (op.tiro === 'Green 1º Tiro') green1++;
-            else if (op.tiro === 'Green 2º Tiro') green2++;
-            else if (op.tiro === 'Green 3º Tiro') green3++;
-            else if (op.tiro === 'RED') reds++;
-            else if (op.tiro === 'Reembolso') reembolsos++;
+            if (op.tiro === 'Green 1º Tiro') { green1++; operacoesValidasBet++; }
+            else if (op.tiro === 'Green 2º Tiro') { green2++; operacoesValidasBet++; }
+            else if (op.tiro === 'Green 3º Tiro') { green3++; operacoesValidasBet++; }
+            else if (op.tiro === 'RED') { reds++; operacoesValidasBet++; }
+            else if (op.tiro === 'Reembolso') { reembolsos++; operacoesValidasBet++; }
         });
         
-        let totalOperacoes = operacoes.length;
         let totalGreens = green1 + green2 + green3;
-        let totalValidos = totalOperacoes - reembolsos;
-        let assertividade = totalValidos > 0 ? Math.round((totalGreens / totalValidos) * 100) : 0;
-        let saldoAtual = BANCA_INICIAL + lucroTotal;
-        let roi = Math.round((lucroTotal / BANCA_INICIAL) * 100);
+        let totalValidosParaAssertividade = operacoesValidasBet - reembolsos;
+        let assertividade = totalValidosParaAssertividade > 0 ? Math.round((totalGreens / totalValidosParaAssertividade) * 100) : 0;
         
-        // 1. ATUALIZAR GRUPO 1
+        let saldoAtual = BANCA_INICIAL + lucroTotal;
+        let roi = BANCA_INICIAL > 0 ? Math.round((lucroTotal / BANCA_INICIAL) * 100) : 0;
+        
         definirElementoValor('saldoAtual', saldoAtual, false);
         definirElementoValor('lucroTotal', lucroTotal, true);
-        document.getElementById('totalOperacoes').textContent = totalOperacoes;
+        document.getElementById('totalOperacoes').textContent = operacoesValidasBet;
         document.getElementById('assertividade').textContent = assertividade + '%';
         
-        // 2. ATUALIZAR GRUPO 2
         document.getElementById('green1').textContent = green1;
         document.getElementById('green2').textContent = green2;
         document.getElementById('green3').textContent = green3;
         document.getElementById('reds').textContent = reds;
         
-        // 3. ATUALIZAR GRUPO 3
         definirElementoValor('resultadoPrincipal', resPrincipal, false);
         definirElementoValor('resultadoOpcionais', resOpcionais, false);
         definirElementoValor('resultadoFinal', lucroTotal, false);
@@ -383,7 +489,6 @@ function calcularEAtualizarDashboard() {
         elRoi.textContent = (roi >= 0 ? '+' : '') + roi + '%';
         elRoi.className = 'card-value ' + (roi >= 0 ? 'green' : 'red');
 
-        // 4. ATUALIZAR FEED LATERAL DE ÚLTIMOS RESULTADOS
         renderizarUltimosResultadosFeed(operacoes);
         
     } catch (e) {
@@ -408,8 +513,7 @@ function renderizarUltimosResultadosFeed(lista) {
     let container = document.getElementById('historicoLista');
     if (!container) return;
     
-    // Filtra e inverte para pegar as 4 mais recentes gravadas
-    let ultimas = [...lista].slice(-4).reverse();
+    let ultimas = [...lista].slice(-5).reverse();
     
     if (ultimas.length === 0) {
         container.innerHTML = '<p style="color:#64748b;font-size:13px;padding:15px 0;font-family:monospace;">Nenhuma entrada gravada.</p>';
