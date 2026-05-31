@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Operação — Controle de Banca</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810;
+  --surface: #0b1120;
+  --surface2: #111827;
+  --border: #1e2d47;
+  --border2: #263347;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --green: #00e5a0;
+  --green-dim: #00e5a015;
+  --red: #ff4d6d;
+  --red-dim: #ff4d6d15;
+  --blue: #3b82f6;
+  --blue-dim: #3b82f615;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  padding: 24px 20px 60px;
+  background-image: radial-gradient(ellipse 80% 40% at 50% -10%, #0d1f3c55, transparent);
+}
+.container { max-width: 1320px; margin: auto; }
+
+/* HEADER */
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.header h1 { font-family: var(--display); font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.header p { font-size: 13px; color: var(--muted); margin-top: 3px; font-family: var(--mono); }
+.badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: var(--mono); color: var(--muted); }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
+.card-title { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.card-title::before { content: ''; display: block; width: 3px; height: 14px; border-radius: 2px; background: var(--blue); }
+
+/* INPUTS */
+label { font-size: 12px; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+input[type="number"], input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border2); background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; transition: border-color 0.2s; }
+input:focus { border-color: var(--blue); }
+input::placeholder { color: var(--muted); opacity: 0.5; }
+
+/* BUTTONS */
+button { cursor: pointer; border: none; border-radius: 9px; padding: 10px 18px; font-weight: 700; font-size: 13px; font-family: var(--sans); transition: opacity 0.15s, transform 0.1s; }
+button:active { transform: scale(0.97); }
+button:hover { opacity: 0.88; }
+.btn-green  { background: var(--green);  color: #021a0e; }
+.btn-red    { background: var(--red);    color: #fff; }
+.btn-blue   { background: var(--blue);   color: #fff; }
+.btn-gray   { background: #1e293b;       color: var(--muted); border: 1px solid var(--border2); }
+.btn-sm     { padding: 7px 13px; font-size: 12px; }
+
+/* PRINCIPAL */
+.grid-principal { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
+.resultado-principal { margin-top: 16px; padding: 14px 18px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+.rlabel { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.valor-display { font-family: var(--mono); font-size: 24px; font-weight: 700; }
+
+/* RADIO */
+.radio-group { display: flex; flex-wrap: wrap; gap: 10px; }
+.radio-opt { display: none; }
+.radio-label { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border2); font-size: 13px; font-family: var(--mono); cursor: pointer; transition: all 0.15s; background: var(--bg); color: var(--muted); }
+.radio-opt:checked + .radio-label { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+/* OPCIONAIS */
+.dist-bar { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.dist-bar .wrap { display: flex; flex-direction: column; }
+.dist-bar .wrap input { width: 160px; }
+#distInfo { font-size: 12px; color: var(--muted); font-family: var(--mono); padding-bottom: 4px; }
+
+.opc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.opc-card { background: var(--bg); border: 1px solid var(--border); border-radius: 13px; padding: 14px; transition: border-color 0.2s, background 0.2s; }
+.opc-card.green-active { border-color: var(--green); background: var(--green-dim); }
+.opc-card.red-active   { border-color: var(--red);   background: var(--red-dim); }
+.opc-nome { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.opc-inputs { display: flex; gap: 8px; margin-bottom: 10px; }
+.opc-inputs > div { flex: 1; }
+.opc-inputs input { font-size: 13px; padding: 8px 10px; }
+.opc-btns { display: flex; gap: 6px; }
+.opc-resultado { margin-top: 8px; font-family: var(--mono); font-size: 13px; font-weight: 700; min-height: 18px; }
+
+/* PAINEL */
+.painel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.painel-box { background: var(--bg); border: 1px solid var(--border); border-radius: 13px; padding: 18px 20px; }
+.pbox-label { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.pbox-valor { font-family: var(--mono); font-size: 28px; font-weight: 700; }
+
+/* HISTORICO */
+#historico { max-height: 280px; overflow-y: auto; font-family: var(--mono); }
+#historico::-webkit-scrollbar { width: 5px; }
+#historico::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.hist-item:last-child { border-bottom: none; }
+.hist-time { font-size: 11px; color: var(--muted); }
+
+/* MISC */
+.acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.green-text { color: var(--green); }
+.red-text   { color: var(--red); }
+.blue-text  { color: var(--blue); }
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; font-family: var(--mono); font-size: 13px; color: var(--green); transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(.34,1.56,.64,1); z-index: 999; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media(max-width: 700px) {
+  .grid-principal { grid-template-columns: 1fr 1fr; }
+  .painel-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div>
+      <h1>Nova Operação</h1>
+      <p id="dataAtual"></p>
+    </div>
+    <div class="badge" id="statusBadge">● Em aberto</div>
+  </div>
+
+  <!-- PRINCIPAL -->
+  <div class="card">
+    <div class="card-title">Operação Principal</div>
+    <div class="grid-principal">
+      <div>
+        <label>Stake Principal</label>
+        <input type="number" id="stakePrincipal" placeholder="0.00">
+      </div>
+      <div>
+        <label>Odd Principal</label>
+        <input type="number" step="0.01" id="oddPrincipal" placeholder="1.00">
+      </div>
+      <div>
+        <label>Mercado / Descrição</label>
+        <input type="text" id="descPrincipal" placeholder="Ex: Over 2.5, BTTS...">
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <button class="btn-green" onclick="principalGreen()">GREEN</button>
+        <button class="btn-red" onclick="principalRed()">RED</button>
+      </div>
+    </div>
+    <div class="resultado-principal">
+      <span class="rlabel">Resultado Principal:</span>
+      <span class="valor-display" id="resultadoPrincipal">R$ 0,00</span>
+    </div>
+  </div>
+
+  <!-- RESULTADO DA ENTRADA -->
+  <div class="card">
+    <div class="card-title">Resultado da Entrada</div>
+    <div class="radio-group">
+      <input type="radio" class="radio-opt" name="tiro" id="t1" value="Green 1º Tiro">
+      <label class="radio-label" for="t1">🟢 Green 1º Tiro</label>
+      <input type="radio" class="radio-opt" name="tiro" id="t2" value="Green 2º Tiro">
+      <label class="radio-label" for="t2">🟢 Green 2º Tiro</label>
+      <input type="radio" class="radio-opt" name="tiro" id="t3" value="Green 3º Tiro">
+      <label class="radio-label" for="t3">🟢 Green 3º Tiro</label>
+      <input type="radio" class="radio-opt" name="tiro" id="t4" value="RED">
+      <label class="radio-label" for="t4">🔴 RED</label>
+      <input type="radio" class="radio-opt" name="tiro" id="t5" value="Reembolso">
+      <label class="radio-label" for="t5">⚪ Reembolso</label>
+    </div>
+  </div>
+
+  <!-- OPCIONAIS -->
+  <div class="card">
+    <div class="card-title">Opcionais</div>
+    <div class="dist-bar">
+      <div class="wrap">
+        <label>Dividir por igual (R$)</label>
+        <input type="number" id="stakeDistribuir" placeholder="Ex: 40.00">
+      </div>
+      <button class="btn-blue btn-sm" onclick="distribuirIgual()">Distribuir</button>
+      <span id="distInfo"></span>
+    </div>
+    <div class="opc-grid" id="opcionais"></div>
+  </div>
+
+  <!-- PAINEL CONSOLIDADO -->
+  <div class="card">
+    <div class="card-title">Painel Consolidado</div>
+    <div class="painel-grid">
+      <div class="painel-box">
+        <div class="pbox-label">Principal</div>
+        <div class="pbox-valor" id="boxPrincipal">R$ 0,00</div>
+      </div>
+      <div class="painel-box">
+        <div class="pbox-label">Opcionais</div>
+        <div class="pbox-valor" id="boxOpcionais">R$ 0,00</div>
+      </div>
+      <div class="painel-box" style="border-color:var(--blue);background:var(--blue-dim);">
+        <div class="pbox-label blue-text">Resultado Final</div>
+        <div class="pbox-valor" id="boxFinal">R$ 0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="card">
+    <div class="card-title">Histórico da Operação</div>
+    <div id="historico">
+      <p style="color:var(--muted);font-size:13px;font-family:var(--mono)">Nenhuma ação registrada.</p>
+    </div>
+  </div>
+
+  <!-- AÇÕES -->
+  <div class="acoes">
+    <button class="btn-blue" onclick="salvarOperacao()">💾 Salvar Operação</button>
+    <button class="btn-gray" onclick="confirmarLimpar()">🗑 Limpar</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var MERCADOS = ['4x0','0x4','+5 Gols','3x3','3x2','2x3','5+ Casa','5+ Fora'];
+
+var resPrincipal  = 0;
+var resOpcionais  = 0;
+var opc           = {};
+var historico_log = [];
+
+// Data
+document.getElementById('dataAtual').textContent =
+  new Date().toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+
+// Montar os 8 opcionais
+var grid = document.getElementById('opcionais');
+for (var i = 0; i < MERCADOS.length; i++) {
+  var nome = MERCADOS[i];
+  var card = document.createElement('div');
+  card.className = 'opc-card';
+  card.id = 'opc_' + i;
+  card.innerHTML =
+    '<div class="opc-nome">' + nome + '</div>' +
+    '<div class="opc-inputs">' +
+      '<div><label>Stake</label><input type="number" placeholder="0.00" id="stake_' + i + '"></div>' +
+      '<div><label>Odd</label><input type="number" placeholder="1.00" step="0.01" id="odd_' + i + '"></div>' +
+    '</div>' +
+    '<div class="opc-btns">' +
+      '<button class="btn-green btn-sm" onclick="greenOpcional(' + i + ')">G</button>' +
+      '<button class="btn-red btn-sm" onclick="redOpcional(' + i + ')">R</button>' +
+    '</div>' +
+    '<div id="res_' + i + '" class="opc-resultado">—</div>';
+  grid.appendChild(card);
+}
+
+function principalGreen() {
+  var stake = num('stakePrincipal');
+  var odd   = num('oddPrincipal');
+  if (!stake || !odd) { toast('Preencha Stake e Odd!', 'red'); return; }
+  resPrincipal = (stake * odd) - stake;
+  log('🟢', 'Principal GREEN', resPrincipal);
+  atualizar();
+}
+
+function principalRed() {
+  var stake = num('stakePrincipal');
+  if (!stake) { toast('Preencha o Stake!', 'red'); return; }
+  resPrincipal = -stake;
+  log('🔴', 'Principal RED', resPrincipal);
+  atualizar();
+}
+
+function greenOpcional(i) {
+  var nome  = MERCADOS[i];
+  var stake = num('stake_' + i);
+  var odd   = num('odd_' + i);
+  if (!stake || !odd) { toast('Preencha Stake e Odd!', 'red'); return; }
+  var lucro = (stake * odd) - stake;
+  opc[i] = lucro;
+  renderOpc('res_' + i, lucro);
+  document.getElementById('opc_' + i).className = 'opc-card green-active';
+  log('🟢', nome, lucro);
+  atualizar();
+}
+
+function redOpcional(i) {
+  var nome  = MERCADOS[i];
+  var stake = num('stake_' + i);
+  if (!stake) { toast('Preencha o Stake!', 'red'); return; }
+  opc[i] = -stake;
+  renderOpc('res_' + i, -stake);
+  document.getElementById('opc_' + i).className = 'opc-card red-active';
+  log('🔴', nome, -stake);
+  atualizar();
+}
+
+function distribuirIgual() {
+  var total = num('stakeDistribuir');
+  if (!total) { toast('Informe o valor!', 'red'); return; }
+  var por = total / MERCADOS.length;
+  for (var i = 0; i < MERCADOS.length; i++) {
+    document.getElementById('stake_' + i).value = por.toFixed(2);
+  }
+  document.getElementById('distInfo').textContent =
+    'R$ ' + por.toFixed(2) + ' por opcional (' + MERCADOS.length + 'x)';
+  toast('Stakes distribuídos!');
+}
+
+function atualizar() {
+  resOpcionais = 0;
+  for (var k in opc) resOpcionais += opc[k];
+  var total = resPrincipal + resOpcionais;
+  renderValor('resultadoPrincipal', resPrincipal);
+  renderValor('boxPrincipal',  resPrincipal);
+  renderValor('boxOpcionais',  resOpcionais);
+  renderValor('boxFinal',      total);
+  var badge = document.getElementById('statusBadge');
+  if (total > 0)      { badge.style.color = 'var(--green)'; badge.textContent = '● Lucrativa'; }
+  else if (total < 0) { badge.style.color = 'var(--red)';   badge.textContent = '● Negativa'; }
+  else                { badge.style.color = 'var(--muted)';  badge.textContent = '● Em aberto'; }
+}
+
+function salvarOperacao() {
+  var tiro  = document.querySelector('input[name="tiro"]:checked');
+  var total = resPrincipal + resOpcionais;
+  var payload = {
+    id: Date.now().toString(),
+    data: new Date().toISOString(),
+    tiro: tiro ? tiro.value : 'Não informado',
+    descricao: document.getElementById('descPrincipal').value || '',
+    resultadoPrincipal: resPrincipal,
+    resultadoOpcionais: resOpcionais,
+    resultadoFinal: total,
+    historico: historico_log
+  };
+  var lista = JSON.parse(localStorage.getItem('operacoes') || '[]');
+  lista.push(payload);
+  localStorage.setItem('operacoes', JSON.stringify(lista));
+  toast('✅ Operação salva!');
+}
+
+function confirmarLimpar() {
+  if (confirm('Limpar todos os dados?')) location.reload();
+}
+
+function num(id) {
+  var el = document.getElementById(id);
+  return el ? Number(el.value) || 0 : 0;
+}
+
+function renderValor(id, valor) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var str = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
+  el.innerHTML = valor >= 0
+    ? '<span class="green-text">' + str + '</span>'
+    : '<span class="red-text">-' + str + '</span>';
+}
+
+function renderOpc(id, valor) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var str = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
+  el.innerHTML = valor >= 0
+    ? '<span class="green-text">+' + str + '</span>'
+    : '<span class="red-text">-' + str + '</span>';
+}
+
+function log(emoji, nome, valor) {
+  var time = new Date().toLocaleTimeString('pt-BR');
+  historico_log.unshift({ time: time, nome: nome, valor: valor });
+  var hist = document.getElementById('historico');
+  var str  = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
+  var vStr = valor >= 0
+    ? '<span class="green-text">+' + str + '</span>'
+    : '<span class="red-text">-' + str + '</span>';
+  if (!hist.querySelector('.hist-item')) hist.innerHTML = '';
+  hist.innerHTML =
+    '<div class="hist-item"><span>' + emoji + ' ' + nome + '</span>' +
+    vStr + '<span class="hist-time">' + time + '</span></div>' +
+    hist.innerHTML;
+}
+
+function toast(msg, tipo) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.color = tipo === 'red' ? 'var(--red)' : 'var(--green)';
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2800);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Banca Inteligente</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+body{
+    background:#020617;
+    color:white;
+    min-height:100vh;
+}
+.bg{
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at top left,#4338ca30,transparent 35%),
+        radial-gradient(circle at bottom right,#2563eb20,transparent 35%);
+    z-index:-1;
+}
+.header{
+    height:80px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 40px;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    backdrop-filter:blur(10px);
+}
+.logo{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.logo-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    background:linear-gradient(135deg,#4f46e5,#2563eb);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:900;
+}
+.logo-text h2{
+    font-size:20px;
+    font-weight:800;
+}
+.logo-text p{
+    font-size:11px;
+    color:#94a3b8;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}
+.user{
+    background:#0f172a;
+    border:1px solid rgba(255,255,255,.05);
+    padding:12px 18px;
+    border-radius:14px;
+    font-size:14px;
+}
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:35px;
+}
+.welcome{
+    margin-bottom:30px;
+}
+.welcome h1{
+    font-size:34px;
+    font-weight:800;
+}
+.welcome p{
+    color:#94a3b8;
+    margin-top:8px;
+}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+.card{
+    background:#071226;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:24px;
+    padding:24px;
+}
+.card-title{
+    font-size:13px;
+    color:#94a3b8;
+    margin-bottom:10px;
+    text-transform:uppercase;
+}
+.card-value{
+    font-size:34px;
+    font-weight:800;
+}
+.green{color:#10b981;}
+.red{color:#ef4444;}
+.main{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+.panel{
+    background:#071226;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:24px;
+    padding:25px;
+}
+.panel h3{
+    margin-bottom:20px;
+    font-size:20px;
+}
+.button{
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#4f46e5,#4338ca);
+    color:white;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.3s;
+}
+.button:hover{
+    transform:translateY(-2px);
+}
+.history-item{
+    display:flex;
+    justify-content:space-between;
+    padding:15px 0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+.logout{
+    margin-top:20px;
+    background:#dc2626;
+}
+@media(max-width:900px){
+    .main{grid-template-columns:1fr;}
+    .header{padding:20px;}
+    .container{padding:20px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon">📈</div>
+        <div class="logo-text">
+            <h2>Controle de Banca Inteligente</h2>
+            <p>Dashboard Premium</p>
+        </div>
+    </div>
+
+    <div class="user">Usuário Logado</div>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h1>Bem‑vindo ao Dashboard</h1>
+        <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução.</p>
+    </div>
+
+    <!-- ========================================================= -->
+    <!--    PRIMEIRO GRUPO DE CARDS  (Saldo, Lucro, Operações, Assertividade) -->
+    <!-- ========================================================= -->
+    <div class="cards">
+        <div class="card">
+            <div class="card-title">Saldo Atual da Banca</div>
+            <div class="card-value green" id="saldoAtual">R$ 0,00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Lucro Total</div>
+            <div class="card-value green" id="lucroTotal">R$ 0,00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Operações</div>
+            <div class="card-value" id="totalOperacoes">0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Assertividade</div>
+            <div class="card-value" id="assertividade">0%</div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!--    SEGUNDO GRUPO DE CARDS  (Green 1°, 2°, 3° e Reds)           -->
+    <!-- ========================================================= -->
+    <div class="cards">
+        <div class="card">
+            <div class="card-title">Green 1º Tiro</div>
+            <div class="card-value green" id="green1">0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Green 2º Tiro</div>
+            <div class="card-value green" id="green2">0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Green 3º Tiro</div>
+            <div class="card-value green" id="green3">0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Reds</div>
+            <div class="card-value red" id="reds">0</div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!--    TERCEIRO GRUPO DE CARDS  (Resultados e ROI)              -->
+    <!-- ========================================================= -->
+    <div class="cards">
+        <div class="card">
+            <div class="card-title">Resultado Principal</div>
+            <div class="card-value" id="resultadoPrincipal">R$ 0,00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Resultado Opcionais</div>
+            <div class="card-value" id="resultadoOpcionais">R$ 0,00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Resultado Consolidado</div>
+            <div class="card-value green" id="resultadoFinal">R$ 0,00</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">ROI</div>
+            <div class="card-value" id="roi">0%</div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!--                              MAIN PANEL                        -->
+    <!-- ============================================================== -->
+    <div class="main">
+
+        <div class="panel">
+            <h3>Nova Operação</h3>
+            <p style="color:#94a3b8;margin-bottom:20px;">
+                Inicie uma nova operação para registrar ganhos ou perdas.
+            </p>
+            <button class="button">Iniciar Operação</button>
+        </div>
+
+        <div class="panel">
+            <h3>Últimos Resultados</h3>
+
+            <div class="history-item">
+                <span>Green</span>
+                <span class="green">+R$ 120</span>
+            </div>
+
+            <div class="history-item">
+                <span>Green</span>
+                <span class="green">+R$ 80</span>
+            </div>
+
+            <div class="history-item">
+                <span>Red</span>
+                <span class="red">-R$ 50</span>
+            </div>
+
+            <div class="history-item">
+                <span>Green</span>
+                <span class="green">+R$ 150</span>
+            </div>
+
+            <button class="button logout" onclick="logout()">Sair</button>
+        </div>
+
+    </div><!-- /.main -->
+
+</div><!-- /.container -->
+
+<script>
+/* ---------- Função de logout (mantida do original) ---------- */
+function logout(){
+    localStorage.clear();
+    window.location.href='index.html';
+}
+
+/* ---------- Exemplo de preenchimento dinâmico (opcional) ---------- */
+/* Caso você queira atualizar os valores via JavaScript a partir de
+   alguma fonte (API, localStorage, etc.), basta atribuir os valores
+   aos elementos abaixo.  */
+function atualizarDashboard(dados){
+    // Primeiro grupo
+    document.getElementById('saldoAtual').textContent    = dados.saldoAtual ?? 'R$ 0,00';
+    document.getElementById('lucroTotal').textContent    = dados.lucroTotal ?? 'R$ 0,00';
+    document.getElementById('totalOperacoes').textContent= dados.totalOperacoes ?? '0';
+    document.getElementById('assertividade').textContent = (dados.assertividade ?? 0) + '%';
+
+    // Segundo grupo
+    document.getElementById('green1').textContent = dados.green1 ?? '0';
+    document.getElementById('green2').textContent = dados.green2 ?? '0';
+    document.getElementById('green3').textContent = dados.green3 ?? '0';
+    document.getElementById('reds').textContent   = dados.reds   ?? '0';
+
+    // Terceiro grupo
+    document.getElementById('resultadoPrincipal').textContent = dados.resultadoPrincipal ?? 'R$ 0,00';
+    document.getElementById('resultadoOpcionais').textContent = dados.resultadoOpcionais ?? 'R$ 0,00';
+    document.getElementById('resultadoFinal').textContent    = dados.resultadoFinal ?? 'R$ 0,00';
+    document.getElementById('roi').textContent               = (dados.roi ?? 0) + '%';
+}
+
+/* Exemplo de chamada (remova ou substitua pelos seus dados reais) */
+const exemploDados = {
+    saldoAtual: 'R$ 6.300,00',
+    lucroTotal: '+R$ 1.250,00',
+    totalOperacoes: 154,
+    assertividade: 78,
+    green1: 15,
+    green2: 22,
+    green3: 9,
+    reds: 4,
+    resultadoPrincipal: 'R$ 550,25',
+    resultadoOpcionais: 'R$ 250,10',
+    resultadoFinal: 'R$ 800,35',
+    roi: 64
+};
+atualizarDashboard(exemploDados);
+</script>
+
+</body>
+</html>
