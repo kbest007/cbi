@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Banca Inteligente</title>
+<title>Controle de Banca Inteligente — Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -53,7 +53,7 @@ body{
     font-weight:900;
 }
 .logo-text h2{
-    font-size:20px;
+    font-size:18px;
     font-weight:800;
 }
 .logo-text p{
@@ -62,12 +62,42 @@ body{
     letter-spacing:1px;
     text-transform:uppercase;
 }
-.user{
+
+/* NOVA BARRA DE NAVEGAÇÃO PROFISSIONAL */
+.nav-links {
+    display: flex;
+    gap: 12px;
+}
+.nav-item {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+.nav-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.04);
+}
+.nav-item.active {
+    background: rgba(79, 70, 229, 0.15);
+    color: #818cf8;
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.user {
     background:#0f172a;
     border:1px solid rgba(255,255,255,.05);
     padding:12px 18px;
     border-radius:14px;
-    font-size:14px;
+    font-size:13px;
+    font-weight: 500;
 }
 .container{
     max-width:1400px;
@@ -107,8 +137,9 @@ body{
     font-size:34px;
     font-weight:800;
 }
-.green{color:#10b981;}
-.red{color:#ef4444;}
+.green{color:#00e5a0;}
+.red{color:#ff4d6d;}
+.muted{color:#64748b;}
 .main{
     display:grid;
     grid-template-columns:2fr 1fr;
@@ -139,19 +170,30 @@ body{
 .button:hover{
     transform:translateY(-2px);
 }
+.history-container {
+    min-height: 160px;
+}
 .history-item{
     display:flex;
     justify-content:space-between;
-    padding:15px 0;
+    align-items:center;
+    padding:14px 0;
     border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:14px;
+}
+.history-item:last-of-type {
+    border-bottom: none;
 }
 .logout{
     margin-top:20px;
     background:#dc2626;
 }
+
 @media(max-width:900px){
     .main{grid-template-columns:1fr;}
-    .header{padding:20px;}
+    .header{padding:20px; height: auto; flex-direction: column; gap: 16px; align-items: flex-start;}
+    .nav-links{width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 6px;}
+    .nav-item{padding: 8px 12px; font-size: 12px;}
     .container{padding:20px;}
 }
 </style>
@@ -165,24 +207,27 @@ body{
     <div class="logo">
         <div class="logo-icon">📈</div>
         <div class="logo-text">
-            <h2>Controle de Banca Inteligente</h2>
+            <h2>Controle de Banca</h2>
             <p>Dashboard Premium</p>
         </div>
     </div>
 
-    <div class="user">Usuário Logado</div>
+    <nav class="nav-links">
+        <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+        <a href="nova-operacao.html" class="nav-item">＋ Nova Operação</a>
+        <a href="relatorios.html" class="nav-item">📈 Relatórios & Analytics</a>
+    </nav>
+
+    <div class="user">Usuário Master</div>
 </header>
 
 <div class="container">
 
     <div class="welcome">
         <h1>Bem‑vindo ao Dashboard</h1>
-        <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução.</p>
+        <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução de forma consolidada.</p>
     </div>
 
-    <!-- ========================================================= -->
-    <!--    PRIMEIRO GRUPO DE CARDS  (Saldo, Lucro, Operações, Assertividade) -->
-    <!-- ========================================================= -->
     <div class="cards">
         <div class="card">
             <div class="card-title">Saldo Atual da Banca</div>
@@ -190,24 +235,21 @@ body{
         </div>
 
         <div class="card">
-            <div class="card-title">Lucro Total</div>
+            <div class="card-title">Lucro / Prejuízo Líquido</div>
             <div class="card-value green" id="lucroTotal">R$ 0,00</div>
         </div>
 
         <div class="card">
-            <div class="card-title">Operações</div>
+            <div class="card-title">Total de Operações</div>
             <div class="card-value" id="totalOperacoes">0</div>
         </div>
 
         <div class="card">
-            <div class="card-title">Assertividade</div>
+            <div class="card-title">Assertividade Geral</div>
             <div class="card-value" id="assertividade">0%</div>
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!--    SEGUNDO GRUPO DE CARDS  (Green 1°, 2°, 3° e Reds)           -->
-    <!-- ========================================================= -->
     <div class="cards">
         <div class="card">
             <div class="card-title">Green 1º Tiro</div>
@@ -225,22 +267,19 @@ body{
         </div>
 
         <div class="card">
-            <div class="card-title">Reds</div>
+            <div class="card-title">Reds Acumulados</div>
             <div class="card-value red" id="reds">0</div>
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!--    TERCEIRO GRUPO DE CARDS  (Resultados e ROI)              -->
-    <!-- ========================================================= -->
     <div class="cards">
         <div class="card">
-            <div class="card-title">Resultado Principal</div>
+            <div class="card-title">Resultado em Principal</div>
             <div class="card-value" id="resultadoPrincipal">R$ 0,00</div>
         </div>
 
         <div class="card">
-            <div class="card-title">Resultado Opcionais</div>
+            <div class="card-title">Resultado em Opcionais</div>
             <div class="card-value" id="resultadoOpcionais">R$ 0,00</div>
         </div>
 
@@ -250,101 +289,147 @@ body{
         </div>
 
         <div class="card">
-            <div class="card-title">ROI</div>
+            <div class="card-title">ROI sobre Banca Base</div>
             <div class="card-value" id="roi">0%</div>
         </div>
     </div>
 
-    <!-- ============================================================== -->
-    <!--                              MAIN PANEL                        -->
-    <!-- ============================================================== -->
     <div class="main">
 
         <div class="panel">
-            <h3>Nova Operação</h3>
-            <p style="color:#94a3b8;margin-bottom:20px;">
-                Inicie uma nova operação para registrar ganhos ou perdas.
+            <h3>Painel de Lançamento</h3>
+            <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;line-height:1.5;">
+                Inicie a calculadora de cobertura para registrar sua nova operação com múltiplos tiros ou distribuição automática em mercados opcionais.
             </p>
-            <button class="button" onclick="window.location.href='nova-operacao.html'">Iniciar Operação</button>
+            <button class="button" onclick="window.location.href='nova-operacao.html'">＋ Iniciar Nova Operação</button>
         </div>
 
         <div class="panel">
             <h3>Últimos Resultados</h3>
-
-            <div class="history-item">
-                <span>Green</span>
-                <span class="green">+R$ 120</span>
+            
+            <div class="history-container" id="historicoLista">
+                <p style="color:#94a3b8;font-size:13px;padding:15px 0;">Nenhuma operação registrada no sistema.</p>
             </div>
 
-            <div class="history-item">
-                <span>Green</span>
-                <span class="green">+R$ 80</span>
-            </div>
-
-            <div class="history-item">
-                <span>Red</span>
-                <span class="red">-R$ 50</span>
-            </div>
-
-            <div class="history-item">
-                <span>Green</span>
-                <span class="green">+R$ 150</span>
-            </div>
-
-            <button class="button logout" onclick="logout()">Sair</button>
+            <button class="button logout" onclick="logout()">Zerar Banco Local & Sair</button>
         </div>
 
-    </div><!-- /.main -->
-
-</div><!-- /.container -->
-
-<script>
-/* ---------- Função de logout (mantida do original) ---------- */
+    </div></div><script>
 function logout(){
-    localStorage.clear();
-    window.location.href='index.html';
+    if(confirm('Isso limpará todo o histórico de operações salvas localmente. Continuar?')){
+        localStorage.clear();
+        location.reload();
+    }
 }
 
-/* ---------- Exemplo de preenchimento dinâmico (opcional) ---------- */
-/* Caso você queira atualizar os valores via JavaScript a partir de
-   alguma fonte (API, localStorage, etc.), basta atribuir os valores
-   aos elementos abaixo.  */
-function atualizarDashboard(dados){
-    // Primeiro grupo
-    document.getElementById('saldoAtual').textContent    = dados.saldoAtual ?? 'R$ 0,00';
-    document.getElementById('lucroTotal').textContent    = dados.lucroTotal ?? 'R$ 0,00';
-    document.getElementById('totalOperacoes').textContent= dados.totalOperacoes ?? '0';
-    document.getElementById('assertividade').textContent = (dados.assertividade ?? 0) + '%';
+// Execução segura e reativa baseada no LocalStorage compartilhado
+document.addEventListener('DOMContentLoaded', function() {
+    calcularEAtualizarDashboard();
+});
 
-    // Segundo grupo
-    document.getElementById('green1').textContent = dados.green1 ?? '0';
-    document.getElementById('green2').textContent = dados.green2 ?? '0';
-    document.getElementById('green3').textContent = dados.green3 ?? '0';
-    document.getElementById('reds').textContent   = dados.reds   ?? '0';
+function calcularEAtualizarDashboard() {
+    try {
+        // Recupera dados salvos pela tela 'nova-operacao.html'
+        const operacoes = JSON.parse(localStorage.getItem('operacoes') || '[]');
+        
+        let BANCA_INICIAL = 5000.00; // Banca base padrão caso queira calcular evolução real
+        let lucroTotal = 0;
+        let green1 = 0;
+        let green2 = 0;
+        let green3 = 0;
+        let reds = 0;
+        let reembolsos = 0;
+        let resPrincipal = 0;
+        let resOpcionais = 0;
+        
+        // Loop consolidador de métricas
+        operacoes.forEach(function(op) {
+            lucroTotal += op.resultadoFinal || 0;
+            resPrincipal += op.resultadoPrincipal || 0;
+            resOpcionais += op.resultadoOpcionais || 0;
+            
+            if (op.tiro === 'Green 1º Tiro') green1++;
+            else if (op.tiro === 'Green 2º Tiro') green2++;
+            else if (op.tiro === 'Green 3º Tiro') green3++;
+            else if (op.tiro === 'RED') reds++;
+            else if (op.tiro === 'Reembolso') reembolsos++;
+        });
+        
+        let totalOperacoes = operacoes.length;
+        let totalGreens = green1 + green2 + green3;
+        let totalValidos = totalOperacoes - reembolsos;
+        let assertividade = totalValidos > 0 ? Math.round((totalGreens / totalValidos) * 100) : 0;
+        let saldoAtual = BANCA_INICIAL + lucroTotal;
+        let roi = Math.round((lucroTotal / BANCA_INICIAL) * 100);
+        
+        // 1. ATUALIZAR GRUPO 1
+        definirElementoValor('saldoAtual', saldoAtual, false);
+        definirElementoValor('lucroTotal', lucroTotal, true);
+        document.getElementById('totalOperacoes').textContent = totalOperacoes;
+        document.getElementById('assertividade').textContent = assertividade + '%';
+        
+        // 2. ATUALIZAR GRUPO 2
+        document.getElementById('green1').textContent = green1;
+        document.getElementById('green2').textContent = green2;
+        document.getElementById('green3').textContent = green3;
+        document.getElementById('reds').textContent = reds;
+        
+        // 3. ATUALIZAR GRUPO 3
+        definirElementoValor('resultadoPrincipal', resPrincipal, false);
+        definirElementoValor('resultadoOpcionais', resOpcionais, false);
+        definirElementoValor('resultadoFinal', lucroTotal, false);
+        
+        let elRoi = document.getElementById('roi');
+        elRoi.textContent = (roi >= 0 ? '+' : '') + roi + '%';
+        elRoi.className = 'card-value ' + (roi >= 0 ? 'green' : 'red');
 
-    // Terceiro grupo
-    document.getElementById('resultadoPrincipal').textContent = dados.resultadoPrincipal ?? 'R$ 0,00';
-    document.getElementById('resultadoOpcionais').textContent = dados.resultadoOpcionais ?? 'R$ 0,00';
-    document.getElementById('resultadoFinal').textContent    = dados.resultadoFinal ?? 'R$ 0,00';
-    document.getElementById('roi').textContent               = (dados.roi ?? 0) + '%';
+        // 4. ATUALIZAR FEED LATERAL DE ÚLTIMOS RESULTADOS
+        renderizarUltimosResultadosFeed(operacoes);
+        
+    } catch (e) {
+        console.error("Erro ao computar dados reais do dashboard:", e);
+    }
 }
 
-/* Exemplo de chamada (remova ou substitua pelos seus dados reais) */
-const exemploDados = {
-    saldoAtual: 'R$ 6.300,00',
-    lucroTotal: '+R$ 1.250,00',
-    totalOperacoes: 154,
-    assertividade: 78,
-    green1: 15,
-    green2: 22,
-    green3: 9,
-    reds: 4,
-    resultadoPrincipal: 'R$ 550,25',
-    resultadoOpcionais: 'R$ 250,10',
-    resultadoFinal: 'R$ 800,35',
-    roi: 64
-};
-atualizarDashboard(exemploDados);
+function definirElementoValor(id, valor, incluirSinal) {
+    let el = document.getElementById(id);
+    if (!el) return;
+    
+    let strMoeda = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
+    let sinal = incluirSinal && valor > 0 ? '+' : (valor < 0 ? '-' : '');
+    
+    el.textContent = sinal + strMoeda;
+    if (valor > 0) el.className = 'card-value green';
+    else if (valor < 0) el.className = 'card-value red';
+    else el.className = 'card-value';
+}
+
+function renderizarUltimosResultadosFeed(lista) {
+    let container = document.getElementById('historicoLista');
+    if (!container) return;
+    
+    // Filtra e inverte para pegar as 4 mais recentes gravadas
+    let ultimas = [...lista].slice(-4).reverse();
+    
+    if (ultimas.length === 0) {
+        container.innerHTML = '<p style="color:#64748b;font-size:13px;padding:15px 0;font-family:monospace;">Nenhuma entrada gravada.</p>';
+        return;
+    }
+    
+    let html = '';
+    ultimas.forEach(function(op) {
+        let corClasse = op.resultadoFinal >= 0 ? 'green' : 'red';
+        let sinal = op.resultadoFinal > 0 ? '+' : '';
+        let textoMoeda = 'R$ ' + Math.abs(op.resultadoFinal).toFixed(2).replace('.', ',');
+        let descricaoExibida = op.descricao ? op.descricao : op.tiro;
+        
+        html += '<div class="history-item">' +
+                    '<span>' + descricaoExibida + '</span>' +
+                    '<span class="' + corClasse + '">' + sinal + textoMoeda + '</span>' +
+                '</div>';
+    });
+    container.innerHTML = html;
+}
 </script>
 
 </body>

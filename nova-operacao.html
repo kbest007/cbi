@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nova Operação — Controle de Banca</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #050810;
-  --surface: #0b1120;
-  --surface2: #111827;
-  --border: #1e2d47;
-  --border2: #263347;
+  --bg: #020617;
+  --surface: #071226;
+  --surface2: #0f172a;
+  --border: rgba(255, 255, 255, 0.05);
+  --border2: rgba(255, 255, 255, 0.1);
   --text: #e2e8f0;
-  --muted: #64748b;
+  --muted: #94a3b8;
   --green: #00e5a0;
   --green-dim: #00e5a015;
   --red: #ff4d6d;
@@ -21,7 +21,7 @@
   --blue: #3b82f6;
   --blue-dim: #3b82f615;
   --mono: 'DM Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
+  --sans: 'Inter', sans-serif;
   --display: 'Syne', sans-serif;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,48 +30,94 @@ body {
   color: var(--text);
   font-family: var(--sans);
   min-height: 100vh;
-  padding: 24px 20px 60px;
-  background-image: radial-gradient(ellipse 80% 40% at 50% -10%, #0d1f3c55, transparent);
+  background-image: radial-gradient(circle at top left,#4338ca20,transparent 35%), radial-gradient(circle at bottom right,#2563eb15,transparent 35%);
 }
-.container { max-width: 1320px; margin: auto; }
+.container { max-width: 1400px; margin: auto; padding: 35px; }
 
-/* HEADER */
-.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-.header h1 { font-family: var(--display); font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-.header p { font-size: 13px; color: var(--muted); margin-top: 3px; font-family: var(--mono); }
+/* HEADER PADRÃO UNIFICADO */
+.header {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(2, 6, 23, 0.7);
+}
+.logo { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg,#4f46e5,#2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 900;
+}
+.logo-text h2 { font-size: 18px; font-weight: 800; color: #fff; }
+.logo-text p { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.nav-links { display: flex; gap: 12px; }
+.nav-item {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+.nav-item:hover { color: white; background: rgba(255, 255, 255, 0.04); }
+.nav-item.active {
+    background: rgba(79, 70, 229, 0.15);
+    color: #818cf8;
+    border-color: rgba(79, 70, 229, 0.3);
+}
+.user { background: var(--surface2); border: 1px solid var(--border); padding: 12px 18px; border-radius: 14px; font-size: 13px; font-weight: 500; }
+
+/* SUB-HEADER DA TELA */
+.page-title-area { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+.page-title-area h1 { font-size: 34px; font-weight: 800; color: #fff; }
+.page-title-area p { color: var(--muted); margin-top: 8px; }
 .badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: var(--mono); color: var(--muted); }
 
-/* CARD */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 18px; }
-.card-title { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 13px; color: var(--muted); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .card-title::before { content: ''; display: block; width: 3px; height: 14px; border-radius: 2px; background: var(--blue); }
 
 /* INPUTS */
 label { font-size: 12px; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
-input[type="number"], input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border2); background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; transition: border-color 0.2s; }
+input[type="number"], input[type="text"] { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; transition: border-color 0.2s; }
 input:focus { border-color: var(--blue); }
 input::placeholder { color: var(--muted); opacity: 0.5; }
 
 /* BUTTONS */
-button { cursor: pointer; border: none; border-radius: 9px; padding: 10px 18px; font-weight: 700; font-size: 13px; font-family: var(--sans); transition: opacity 0.15s, transform 0.1s; }
-button:active { transform: scale(0.97); }
-button:hover { opacity: 0.88; }
+button, .btn-link-action { cursor: pointer; border: none; border-radius: 12px; padding: 14px 24px; font-weight: 700; font-size: 14px; transition: opacity 0.15s, transform 0.1s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+button:active, .btn-link-action:active { transform: scale(0.97); }
+button:hover, .btn-link-action:hover { opacity: 0.88; }
 .btn-green  { background: var(--green);  color: #021a0e; }
 .btn-red    { background: var(--red);    color: #fff; }
 .btn-blue   { background: var(--blue);   color: #fff; }
-.btn-gray   { background: #1e293b;       color: var(--muted); border: 1px solid var(--border2); }
-.btn-sm     { padding: 7px 13px; font-size: 12px; }
+.btn-gray   { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-sm     { padding: 7px 13px; font-size: 12px; border-radius: 8px; }
 
 /* PRINCIPAL */
 .grid-principal { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
-.resultado-principal { margin-top: 16px; padding: 14px 18px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+.resultado-principal { margin-top: 16px; padding: 14px 18px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
 .rlabel { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 .valor-display { font-family: var(--mono); font-size: 24px; font-weight: 700; }
 
 /* RADIO */
 .radio-group { display: flex; flex-wrap: wrap; gap: 10px; }
 .radio-opt { display: none; }
-.radio-label { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border2); font-size: 13px; font-family: var(--mono); cursor: pointer; transition: all 0.15s; background: var(--bg); color: var(--muted); }
+.radio-label { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); font-size: 13px; font-family: var(--mono); cursor: pointer; transition: all 0.15s; background: var(--bg); color: var(--muted); }
 .radio-opt:checked + .radio-label { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
 /* OPCIONAIS */
@@ -81,19 +127,19 @@ button:hover { opacity: 0.88; }
 #distInfo { font-size: 12px; color: var(--muted); font-family: var(--mono); padding-bottom: 4px; }
 
 .opc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
-.opc-card { background: var(--bg); border: 1px solid var(--border); border-radius: 13px; padding: 14px; transition: border-color 0.2s, background 0.2s; }
+.opc-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 14px; transition: border-color 0.2s, background 0.2s; }
 .opc-card.green-active { border-color: var(--green); background: var(--green-dim); }
 .opc-card.red-active   { border-color: var(--red);   background: var(--red-dim); }
 .opc-nome { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
 .opc-inputs { display: flex; gap: 8px; margin-bottom: 10px; }
 .opc-inputs > div { flex: 1; }
-.opc-inputs input { font-size: 13px; padding: 8px 10px; }
+.opc-inputs input { font-size: 13px; padding: 8px 10px; border-radius: 8px; }
 .opc-btns { display: flex; gap: 6px; }
 .opc-resultado { margin-top: 8px; font-family: var(--mono); font-size: 13px; font-weight: 700; min-height: 18px; }
 
 /* PAINEL */
 .painel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.painel-box { background: var(--bg); border: 1px solid var(--border); border-radius: 13px; padding: 18px 20px; }
+.painel-box { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; }
 .pbox-label { font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 .pbox-valor { font-family: var(--mono); font-size: 28px; font-weight: 700; }
 
@@ -105,24 +151,45 @@ button:hover { opacity: 0.88; }
 .hist-item:last-child { border-bottom: none; }
 .hist-time { font-size: 11px; color: var(--muted); }
 
-/* MISC */
-.acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+/* BARRA DE AÇÕES INFERIOR CORRIGIDA */
+.acoes { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border); }
 .green-text { color: var(--green); }
 .red-text   { color: var(--red); }
 .blue-text  { color: var(--blue); }
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; font-family: var(--mono); font-size: 13px; color: var(--green); transform: translateY(80px); opacity: 0; transition: all 0.3s cubic-bezier(.34,1.56,.64,1); z-index: 999; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-@media(max-width: 700px) {
+@media(max-width: 900px) {
+  .header { padding: 20px; height: auto; flex-direction: column; gap: 16px; align-items: flex-start; }
+  .nav-links { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
   .grid-principal { grid-template-columns: 1fr 1fr; }
   .painel-grid { grid-template-columns: 1fr; }
+  .acoes { flex-direction: column; }
+  .acoes button, .acoes .btn-link-action { width: 100%; justify-content: center; }
 }
 </style>
 </head>
 <body>
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon">📈</div>
+        <div class="logo-text">
+            <h2>Controle de Banca</h2>
+            <p>Dashboard Premium</p>
+        </div>
+    </div>
+    <nav class="nav-links">
+        <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+        <a href="nova-operacao.html" class="nav-item active">＋ Nova Operação</a>
+        <a href="relatorios.html" class="nav-item">📈 Relatórios & Analytics</a>
+    </nav>
+    <div class="user">Usuário Master</div>
+</header>
+
 <div class="container">
 
-  <div class="header">
+  <div class="page-title-area">
     <div>
       <h1>Nova Operação</h1>
       <p id="dataAtual"></p>
@@ -130,7 +197,6 @@ button:hover { opacity: 0.88; }
     <div class="badge" id="statusBadge">● Em aberto</div>
   </div>
 
-  <!-- PRINCIPAL -->
   <div class="card">
     <div class="card-title">Operação Principal</div>
     <div class="grid-principal">
@@ -157,7 +223,6 @@ button:hover { opacity: 0.88; }
     </div>
   </div>
 
-  <!-- RESULTADO DA ENTRADA -->
   <div class="card">
     <div class="card-title">Resultado da Entrada</div>
     <div class="radio-group">
@@ -174,7 +239,6 @@ button:hover { opacity: 0.88; }
     </div>
   </div>
 
-  <!-- OPCIONAIS -->
   <div class="card">
     <div class="card-title">Opcionais</div>
     <div class="dist-bar">
@@ -188,7 +252,6 @@ button:hover { opacity: 0.88; }
     <div class="opc-grid" id="opcionais"></div>
   </div>
 
-  <!-- PAINEL CONSOLIDADO -->
   <div class="card">
     <div class="card-title">Painel Consolidado</div>
     <div class="painel-grid">
@@ -207,7 +270,6 @@ button:hover { opacity: 0.88; }
     </div>
   </div>
 
-  <!-- HISTÓRICO -->
   <div class="card">
     <div class="card-title">Histórico da Operação</div>
     <div id="historico">
@@ -215,10 +277,11 @@ button:hover { opacity: 0.88; }
     </div>
   </div>
 
-  <!-- AÇÕES -->
   <div class="acoes">
-    <button class="btn-blue" onclick="salvarOperacao()">💾 Salvar Operação</button>
-    <button class="btn-gray" onclick="confirmarLimpar()">🗑 Limpar</button>
+    <button class="btn-green" onclick="salvarOperacao()">💾 Salvar Entrada</button>
+    <button class="btn-gray" onclick="confirmarLimpar()">✨ Limpar Campos</button>
+    
+    <a href="relatorios.html" class="btn-link-action btn-blue" style="margin-left: auto;">📈 Ver nos Relatórios ➔</a>
   </div>
 
 </div>
@@ -227,36 +290,48 @@ button:hover { opacity: 0.88; }
 
 <script>
 var MERCADOS = ['4x0','0x4','+5 Gols','3x3','3x2','2x3','5+ Casa','5+ Fora'];
-
 var resPrincipal  = 0;
 var resOpcionais  = 0;
 var opc           = {};
 var historico_log = [];
 
-// Data
-document.getElementById('dataAtual').textContent =
-  new Date().toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var elData = document.getElementById('dataAtual');
+    if (elData) {
+      try {
+        elData.textContent = new Date().toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+      } catch (errDataStyle) {
+        elData.textContent = new Date().toLocaleString('pt-BR');
+      }
+    }
+  } catch (e) { console.error(e); }
 
-// Montar os 8 opcionais
-var grid = document.getElementById('opcionais');
-for (var i = 0; i < MERCADOS.length; i++) {
-  var nome = MERCADOS[i];
-  var card = document.createElement('div');
-  card.className = 'opc-card';
-  card.id = 'opc_' + i;
-  card.innerHTML =
-    '<div class="opc-nome">' + nome + '</div>' +
-    '<div class="opc-inputs">' +
-      '<div><label>Stake</label><input type="number" placeholder="0.00" id="stake_' + i + '"></div>' +
-      '<div><label>Odd</label><input type="number" placeholder="1.00" step="0.01" id="odd_' + i + '"></div>' +
-    '</div>' +
-    '<div class="opc-btns">' +
-      '<button class="btn-green btn-sm" onclick="greenOpcional(' + i + ')">G</button>' +
-      '<button class="btn-red btn-sm" onclick="redOpcional(' + i + ')">R</button>' +
-    '</div>' +
-    '<div id="res_' + i + '" class="opc-resultado">—</div>';
-  grid.appendChild(card);
-}
+  try {
+    var grid = document.getElementById('opcionais');
+    if (grid) {
+      grid.innerHTML = '';
+      for (var i = 0; i < MERCADOS.length; i++) {
+        var nome = MERCADOS[i];
+        var card = document.createElement('div');
+        card.className = 'opc-card';
+        card.id = 'opc_' + i;
+        card.innerHTML =
+          '<div class="opc-nome">' + nome + '</div>' +
+          '<div class="opc-inputs">' +
+            '<div><label>Stake</label><input type="number" placeholder="0.00" id="stake_' + i + '"></div>' +
+            '<div><label>Odd</label><input type="number" placeholder="1.00" step="0.01" id="odd_' + i + '"></div>' +
+          '</div>' +
+          '<div class="opc-btns">' +
+            '<button class="btn-green btn-sm" onclick="greenOpcional(' + i + ')">G</button>' +
+            '<button class="btn-red btn-sm" onclick="redOpcional(' + i + ')">R</button>' +
+          '</div>' +
+          '<div id="res_' + i + '" class="opc-resultado">—</div>';
+        grid.appendChild(card);
+      }
+    }
+  } catch (e) { console.error(e); }
+});
 
 function principalGreen() {
   var stake = num('stakePrincipal');
@@ -283,7 +358,8 @@ function greenOpcional(i) {
   var lucro = (stake * odd) - stake;
   opc[i] = lucro;
   renderOpc('res_' + i, lucro);
-  document.getElementById('opc_' + i).className = 'opc-card green-active';
+  var elCard = document.getElementById('opc_' + i);
+  if (elCard) elCard.className = 'opc-card green-active';
   log('🟢', nome, lucro);
   atualizar();
 }
@@ -294,7 +370,8 @@ function redOpcional(i) {
   if (!stake) { toast('Preencha o Stake!', 'red'); return; }
   opc[i] = -stake;
   renderOpc('res_' + i, -stake);
-  document.getElementById('opc_' + i).className = 'opc-card red-active';
+  var elCard = document.getElementById('opc_' + i);
+  if (elCard) elCard.className = 'opc-card red-active';
   log('🔴', nome, -stake);
   atualizar();
 }
@@ -304,10 +381,11 @@ function distribuirIgual() {
   if (!total) { toast('Informe o valor!', 'red'); return; }
   var por = total / MERCADOS.length;
   for (var i = 0; i < MERCADOS.length; i++) {
-    document.getElementById('stake_' + i).value = por.toFixed(2);
+    var el = document.getElementById('stake_' + i);
+    if (el) el.value = por.toFixed(2);
   }
-  document.getElementById('distInfo').textContent =
-    'R$ ' + por.toFixed(2) + ' por opcional (' + MERCADOS.length + 'x)';
+  var elDist = document.getElementById('distInfo');
+  if (elDist) elDist.textContent = 'R$ ' + por.toFixed(2) + ' por opcional (' + MERCADOS.length + 'x)';
   toast('Stakes distribuídos!');
 }
 
@@ -320,9 +398,11 @@ function atualizar() {
   renderValor('boxOpcionais',  resOpcionais);
   renderValor('boxFinal',      total);
   var badge = document.getElementById('statusBadge');
-  if (total > 0)      { badge.style.color = 'var(--green)'; badge.textContent = '● Lucrativa'; }
-  else if (total < 0) { badge.style.color = 'var(--red)';   badge.textContent = '● Negativa'; }
-  else                { badge.style.color = 'var(--muted)';  badge.textContent = '● Em aberto'; }
+  if (badge) {
+    if (total > 0)      { badge.style.color = 'var(--green)'; badge.textContent = '● Lucrativa'; }
+    else if (total < 0) { badge.style.color = 'var(--red)';   badge.textContent = '● Negativa'; }
+    else                { badge.style.color = 'var(--muted)';  badge.textContent = '● Em aberto'; }
+  }
 }
 
 function salvarOperacao() {
@@ -344,50 +424,37 @@ function salvarOperacao() {
   toast('✅ Operação salva!');
 }
 
-function confirmarLimpar() {
-  if (confirm('Limpar todos os dados?')) location.reload();
-}
-
-function num(id) {
-  var el = document.getElementById(id);
-  return el ? Number(el.value) || 0 : 0;
-}
+function confirmarLimpar() { if (confirm('Limpar todos os dados?')) location.reload(); }
+function num(id) { var el = document.getElementById(id); return el ? Number(el.value) || 0 : 0; }
 
 function renderValor(id, valor) {
   var el = document.getElementById(id);
   if (!el) return;
   var str = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
-  el.innerHTML = valor >= 0
-    ? '<span class="green-text">' + str + '</span>'
-    : '<span class="red-text">-' + str + '</span>';
+  el.innerHTML = valor >= 0 ? '<span class="green-text">' + str + '</span>' : '<span class="red-text">-' + str + '</span>';
 }
 
 function renderOpc(id, valor) {
   var el = document.getElementById(id);
   if (!el) return;
   var str = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
-  el.innerHTML = valor >= 0
-    ? '<span class="green-text">+' + str + '</span>'
-    : '<span class="red-text">-' + str + '</span>';
+  el.innerHTML = valor >= 0 ? '<span class="green-text">+' + str + '</span>' : '<span class="red-text">-' + str + '</span>';
 }
 
 function log(emoji, nome, valor) {
   var time = new Date().toLocaleTimeString('pt-BR');
   historico_log.unshift({ time: time, nome: nome, valor: valor });
   var hist = document.getElementById('historico');
+  if (!hist) return;
   var str  = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
-  var vStr = valor >= 0
-    ? '<span class="green-text">+' + str + '</span>'
-    : '<span class="red-text">-' + str + '</span>';
+  var vStr = valor >= 0 ? '<span class="green-text">+' + str + '</span>' : '<span class="red-text">-' + str + '</span>';
   if (!hist.querySelector('.hist-item')) hist.innerHTML = '';
-  hist.innerHTML =
-    '<div class="hist-item"><span>' + emoji + ' ' + nome + '</span>' +
-    vStr + '<span class="hist-time">' + time + '</span></div>' +
-    hist.innerHTML;
+  hist.innerHTML = '<div class="hist-item"><span>' + emoji + ' ' + nome + '</span>' + vStr + '<span class="hist-time">' + time + '</span></div>' + hist.innerHTML;
 }
 
 function toast(msg, tipo) {
   var el = document.getElementById('toast');
+  if (!el) return;
   el.textContent = msg;
   el.style.color = tipo === 'red' ? 'var(--red)' : 'var(--green)';
   el.classList.add('show');
