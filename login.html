@@ -334,8 +334,13 @@ mensagem(error.message,'error')
 return
 }
 
+// Ativa trial de 7 dias automaticamente ao cadastrar
+if (typeof window.CBI_LICENCA !== 'undefined') {
+  window.CBI_LICENCA.ativarTrial(email.trim().toLowerCase())
+}
+
 mensagem(
-'Conta criada com sucesso. Verifique seu email.',
+'Conta criada! Você tem 7 dias gratuitos de acesso. Verifique seu email para confirmar.',
 'success'
 )
 

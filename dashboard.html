@@ -417,17 +417,22 @@ body{
         // Mostra aviso de dias restantes
         const aviso = document.getElementById('avisoLicenca');
         if (aviso) {
-            const cor = lic.restam <= 2 ? '#ff4d6d' : '#00e5a0';
-            const bg  = lic.restam <= 2 ? 'rgba(255,77,109,.08)' : 'rgba(0,229,160,.08)';
-            const bor = lic.restam <= 2 ? 'rgba(255,77,109,.25)' : 'rgba(0,229,160,.25)';
+            const isTrial = lic.tipo === 'trial';
+            const urgente = lic.restam <= 2;
+            const cor = urgente ? '#ff4d6d' : (isTrial ? '#a78bfa' : '#00e5a0');
+            const bg  = urgente ? 'rgba(255,77,109,.08)' : (isTrial ? 'rgba(124,58,237,.08)' : 'rgba(0,229,160,.08)');
+            const bor = urgente ? 'rgba(255,77,109,.25)' : (isTrial ? 'rgba(124,58,237,.25)' : 'rgba(0,229,160,.25)');
+            const label = isTrial ? '🆓 Trial gratuito' : '✅ Licença ativa';
+            const msg = urgente && isTrial
+                ? `⚠ Seu trial encerra em <strong>${lic.restam} dia(s)</strong>. Contate o administrador para assinar o plano.`
+                : `${label} — <strong>${lic.restam} dia(s)</strong> restante(s)`;
             aviso.style.display = 'block';
             aviso.innerHTML = `
                 <div style="background:${bg};border:1px solid ${bor};border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-                    <span style="color:${cor};font-size:14px;font-weight:600;">
-                        🕐 Sua licença expira em <strong>${lic.restam} dia(s)</strong>
-                    </span>
-                    <span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>
+                    <span style="color:${cor};font-size:14px;font-weight:600;">${msg}</span>
+                    ${urgente ? `<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>` : ''}
                 </div>`;
+        }
         }
     }
 })();
