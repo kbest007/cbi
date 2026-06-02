@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Banca Inteligente — Dashboard</title>
 
+<script src="licenca.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
@@ -271,6 +273,17 @@ body{
         <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução de forma consolidada.</p>
     </div>
 
+    <!-- PAINEL ADMIN: visível apenas para o administrador -->
+    <div id="painelAdmin" style="display:none;margin-bottom:30px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <span style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;color:white;letter-spacing:1px;">👑 MODO ADMINISTRADOR</span>
+        </div>
+        <div id="licencaAdminContainer"></div>
+    </div>
+
+    <!-- AVISO DE LICENÇA: dias restantes para usuários comuns -->
+    <div id="avisoLicenca" style="display:none;"></div>
+
     <div class="cards">
         <div class="card">
             <div class="card-title">Saldo Atual da Banca</div>
@@ -373,6 +386,53 @@ body{
 </div>
 
 <script>
+// ── CONTROLE DE LICENÇA ──────────────────────────────────────────
+(async function inicializarLicenca() {
+    // Garante que o módulo de licença está disponível
+    if (typeof window.CBI_LICENCA === 'undefined') return;
+
+    const emailSessao = localStorage.getItem('cbi_email_sessao');
+
+    if (!emailSessao) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const ADMIN = window.CBI_LICENCA.ADMIN_EMAIL;
+
+    if (emailSessao === ADMIN) {
+        // Mostra painel admin
+        document.getElementById('painelAdmin').style.display = 'block';
+        window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
+    } else {
+        // Verifica licença do usuário comum
+        const lic = window.CBI_LICENCA.verificarLicenca(emailSessao);
+        if (!lic.ativa) {
+            window.CBI_LICENCA.protegerPagina && window.CBI_LICENCA.protegerPagina();
+            // fallback inline
+            document.body.innerHTML = '';
+            window.CBI_LICENCA.protegerPagina();
+            return;
+        }
+        // Mostra aviso de dias restantes
+        const aviso = document.getElementById('avisoLicenca');
+        if (aviso) {
+            const cor = lic.restam <= 2 ? '#ff4d6d' : '#00e5a0';
+            const bg  = lic.restam <= 2 ? 'rgba(255,77,109,.08)' : 'rgba(0,229,160,.08)';
+            const bor = lic.restam <= 2 ? 'rgba(255,77,109,.25)' : 'rgba(0,229,160,.25)';
+            aviso.style.display = 'block';
+            aviso.innerHTML = `
+                <div style="background:${bg};border:1px solid ${bor};border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                    <span style="color:${cor};font-size:14px;font-weight:600;">
+                        🕐 Sua licença expira em <strong>${lic.restam} dia(s)</strong>
+                    </span>
+                    <span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>
+                </div>`;
+        }
+    }
+})();
+// ────────────────────────────────────────────────────────────────
+
 // NOVAS FUNÇÕES DE GESTÃO DE BANCA
 function salvarBancaInicial() {
     let valor = document.getElementById('inputBancaInicial').value;

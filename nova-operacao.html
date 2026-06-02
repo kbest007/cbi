@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="licenca.js"></script>
 <title>Nova Operação — Controle de Banca</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -289,6 +290,27 @@ button:hover, .btn-link-action:hover { opacity: 0.88; }
 <div class="toast" id="toast"></div>
 
 <script>
+// ── PROTEÇÃO DE LICENÇA ──────────────────────────────────────────
+(function() {
+    const email = localStorage.getItem('cbi_email_sessao');
+    if (!email) { window.location.href = 'login.html'; return; }
+    if (typeof window.CBI_LICENCA !== 'undefined' && email !== window.CBI_LICENCA.ADMIN_EMAIL) {
+        const lic = window.CBI_LICENCA.verificarLicenca(email);
+        if (!lic.ativa) {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Remove scripts para não executar lógica de negócio
+                document.querySelectorAll('script:not([src])').forEach(s => s.remove());
+                window.CBI_LICENCA && (function() {
+                    const m = 'Acesso bloqueado. Fale com o administrador.';
+                    document.body.style.cssText = 'background:#020617;';
+                    document.body.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;color:white;font-family:Inter,sans-serif;"><div style="font-size:48px;margin-bottom:16px;">🔒</div><h2 style="font-size:22px;font-weight:800;margin-bottom:8px;">Licença inativa</h2><p style="color:#94a3b8;margin-bottom:24px;">' + m + '</p><button onclick="window.location.href=\'login.html\'" style="padding:12px 24px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Voltar ao Login</button></div></div>';
+                })();
+            });
+        }
+    }
+})();
+// ─────────────────────────────────────────────────────────────────
+
 var MERCADOS = ['4x0','0x4','+5 Gols','3x3','3x2','2x3','5+ Casa','5+ Fora'];
 var resPrincipal  = 0;
 var resOpcionais  = 0;
