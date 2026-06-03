@@ -309,8 +309,10 @@ mensagem(error.message,'error')
 return
 }
 
-// Salva o e-mail da sessão para verificação de licença
+// Salva e-mail e user_id da sessão
+const { data: sessionData } = await supabase.auth.getSession()
 localStorage.setItem('cbi_email_sessao', email.trim().toLowerCase())
+if(sessionData.session) localStorage.setItem('cbi_user_id', sessionData.session.user.id)
 
 mensagem('Login realizado com sucesso!','success')
 
@@ -374,8 +376,8 @@ mensagem(
 const { data } = await supabase.auth.getSession()
 
 if(data.session){
-// Persiste o e-mail para verificação de licença
 localStorage.setItem('cbi_email_sessao', data.session.user.email.trim().toLowerCase())
+localStorage.setItem('cbi_user_id', data.session.user.id)
 window.location.href='dashboard.html'
 }
 
