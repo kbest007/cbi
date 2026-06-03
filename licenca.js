@@ -1,12 +1,14 @@
 // ============================================================
 //  SISTEMA DE LICENÇA — Controle de Banca Inteligente
-//  Arquivo: licenca.js
+//  Arquivo: licenca.js  — v2 (Supabase)
 // ============================================================
 
-const ADMIN_EMAIL    = 'cbest07@gmail.com';
-const TRIAL_DIAS     = 7;   // dias gratuitos ao criar conta
-const LS_KEY         = 'cbi_licencas';
-const LS_SESSAO      = 'cbi_email_sessao';
+const ADMIN_EMAIL = 'cbest07@gmail.com';
+const TRIAL_DIAS  = 7;
+const LS_SESSAO   = 'cbi_email_sessao';
+
+const SUPA_URL    = 'https://tjzcgfjdhunqfifxgyyy.supabase.co';
+const SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg';
 
 // ----------------------------------------------------------------
 // Helpers de data
@@ -27,68 +29,94 @@ function formatarData(iso) {
 }
 
 // ----------------------------------------------------------------
-// Storage de licenças
+// Requisições ao Supabase (REST direto — sem SDK)
 // ----------------------------------------------------------------
-function lerLicencas() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
-  catch { return {}; }
+async function supaFetch(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SUPA_URL + '/rest/v1/' + path, opts);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
-function salvarLicencas(obj) {
-  localStorage.setItem(LS_KEY, JSON.stringify(obj));
-}
-
 // ----------------------------------------------------------------
-// API pública
+// API pública (todas assíncronas agora)
 // ----------------------------------------------------------------
 
 // Cria trial de 7 dias ao cadastrar (só se não existir licença)
-function ativarTrial(email) {
-  const licencas = lerLicencas();
-  if (licencas[email]) return; // já tem, não sobrescreve
-  licencas[email] = {
-    email,
+async function ativarTrial(email) {
+  const norm = email.trim().toLowerCase();
+  // Verifica se já existe
+  const rows = await supaFetch(`licencas?email=eq.${encodeURIComponent(norm)}&select=email`);
+  if (rows && rows.length > 0) return; // já tem, não sobrescreve
+
+  await supaFetch('licencas', 'POST', {
+    email: norm,
     tipo: 'trial',
-    liberadoEm: new Date().toISOString(),
+    liberado_em: new Date().toISOString(),
     expiracao: dataExpiracaoPara(TRIAL_DIAS)
-  };
-  salvarLicencas(licencas);
+  });
 }
 
 // Admin libera licença com data customizada
-function liberarLicenca(email, dataFim) {
-  const licencas = lerLicencas();
-  licencas[email] = {
-    email,
+async function liberarLicenca(email, dataFim) {
+  const norm = email.trim().toLowerCase();
+  const expiracao = dataFim
+    ? new Date(dataFim).toISOString()
+    : dataExpiracaoPara(30);
+
+  // Upsert: atualiza se existe, insere se não existe
+  await supaFetch('licencas?email=eq.' + encodeURIComponent(norm), 'DELETE');
+  await supaFetch('licencas', 'POST', {
+    email: norm,
     tipo: 'ativa',
-    liberadoEm: new Date().toISOString(),
-    expiracao: dataFim ? new Date(dataFim).toISOString() : dataExpiracaoPara(30)
-  };
-  salvarLicencas(licencas);
+    liberado_em: new Date().toISOString(),
+    expiracao
+  });
 }
 
-function revogarLicenca(email) {
-  const licencas = lerLicencas();
-  delete licencas[email];
-  salvarLicencas(licencas);
+async function revogarLicenca(email) {
+  const norm = email.trim().toLowerCase();
+  await supaFetch('licencas?email=eq.' + encodeURIComponent(norm), 'DELETE');
 }
 
-function verificarLicenca(email) {
-  const licencas = lerLicencas();
-  const lic = licencas[email];
-  if (!lic) return { ativa: false, motivo: 'Sem licença cadastrada.', semLicenca: true };
-  const restam = diasRestantes(lic.expiracao);
-  if (restam <= 0) {
-    const expirou = lic.tipo === 'trial'
-      ? 'Seu período de teste gratuito encerrou.'
-      : 'Sua licença expirou.';
-    return { ativa: false, motivo: expirou, tipo: lic.tipo };
+async function verificarLicenca(email) {
+  const norm = email.trim().toLowerCase();
+  try {
+    const rows = await supaFetch(`licencas?email=eq.${encodeURIComponent(norm)}&select=*`);
+    if (!rows || rows.length === 0) {
+      return { ativa: false, motivo: 'Sem licença cadastrada.', semLicenca: true };
+    }
+    const lic = rows[0];
+    const restam = diasRestantes(lic.expiracao);
+    if (restam <= 0) {
+      const msg = lic.tipo === 'trial'
+        ? 'Seu período de teste gratuito encerrou.'
+        : 'Sua licença expirou.';
+      return { ativa: false, motivo: msg, tipo: lic.tipo };
+    }
+    return { ativa: true, restam, tipo: lic.tipo, expiracao: lic.expiracao };
+  } catch (e) {
+    console.error('Erro ao verificar licença:', e);
+    return { ativa: false, motivo: 'Erro ao verificar licença. Tente novamente.', semLicenca: true };
   }
-  return { ativa: true, restam, tipo: lic.tipo, expiracao: lic.expiracao };
 }
 
-function listarTodasLicencas() {
-  return lerLicencas();
+async function listarTodasLicencas() {
+  const rows = await supaFetch('licencas?select=*&order=liberado_em.desc');
+  return rows || [];
 }
 
 // ----------------------------------------------------------------
@@ -131,14 +159,14 @@ function mostrarTelaAcessoBloqueado(email, motivo, tipo) {
 }
 
 // ----------------------------------------------------------------
-// Proteção de página
+// Proteção de página (agora assíncrona)
 // ----------------------------------------------------------------
-function protegerPagina() {
+async function protegerPagina() {
   const email = localStorage.getItem(LS_SESSAO);
   if (!email) { window.location.href = 'login.html'; return null; }
   if (email === ADMIN_EMAIL) return { email, isAdmin: true };
 
-  const lic = verificarLicenca(email);
+  const lic = await verificarLicenca(email);
   if (!lic.ativa) {
     mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo);
     return null;
@@ -149,13 +177,20 @@ function protegerPagina() {
 // ----------------------------------------------------------------
 // Painel de Administração
 // ----------------------------------------------------------------
-function renderizarPainelAdmin(containerId) {
+async function renderizarPainelAdmin(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  function refresh() {
-    const licencas = listarTodasLicencas();
-    const entradas = Object.values(licencas);
+  async function refresh() {
+    container.innerHTML = `<p style="color:#64748b;font-size:13px;padding:16px 0;">Carregando...</p>`;
+
+    let entradas = [];
+    try {
+      entradas = await listarTodasLicencas();
+    } catch(e) {
+      container.innerHTML = `<p style="color:#ef4444;font-size:13px;">Erro ao carregar licenças.</p>`;
+      return;
+    }
 
     const linhas = entradas.map(lic => {
       const restam = diasRestantes(lic.expiracao);
@@ -190,7 +225,6 @@ function renderizarPainelAdmin(containerId) {
       ? `<p style="color:#64748b;font-size:13px;padding:16px 0;">Nenhum usuário cadastrado ainda.</p>`
       : '';
 
-    // Data mínima = hoje, padrão = 30 dias
     const hoje = new Date().toISOString().split('T')[0];
     const padrao30 = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
 
@@ -240,7 +274,6 @@ function renderizarPainelAdmin(containerId) {
       </div>
     `;
 
-    // handlers
     let emailRenovar = '';
 
     window.abrirRenovar = function(email) {
@@ -251,15 +284,15 @@ function renderizarPainelAdmin(containerId) {
     window.fecharModal = function() {
       document.getElementById('modalRenovar').style.display = 'none';
     };
-    window.confirmarRenovar = function() {
+    window.confirmarRenovar = async function() {
       const data = document.getElementById('modalDataFim').value;
       if (!data) return;
-      liberarLicenca(emailRenovar, data);
+      await liberarLicenca(emailRenovar, data);
       fecharModal();
       refresh();
     };
 
-    window.liberarLicencaAdmin = function() {
+    window.liberarLicencaAdmin = async function() {
       const input = document.getElementById('adminEmailInput');
       const dataInput = document.getElementById('adminDataFim');
       const msg = document.getElementById('adminMsg');
@@ -281,20 +314,27 @@ function renderizarPainelAdmin(containerId) {
         return;
       }
 
-      liberarLicenca(email, dataFim);
-      input.value = '';
-      dataInput.value = padrao30;
-      msg.style.display = 'block';
-      msg.style.background = 'rgba(0,229,160,.08)';
-      msg.style.color = '#86efac';
-      msg.textContent = `✓ Licença liberada para ${email} até ${new Date(dataFim).toLocaleDateString('pt-BR')}`;
-      setTimeout(() => { msg.style.display = 'none'; }, 5000);
-      refresh();
+      try {
+        await liberarLicenca(email, dataFim);
+        input.value = '';
+        dataInput.value = padrao30;
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(0,229,160,.08)';
+        msg.style.color = '#86efac';
+        msg.textContent = `✓ Licença liberada para ${email} até ${new Date(dataFim).toLocaleDateString('pt-BR')}`;
+        setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        refresh();
+      } catch(e) {
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(220,38,38,.1)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = '⚠ Erro ao liberar licença. Verifique o console.';
+      }
     };
 
-    window.revogarLicencaAdmin = function(email) {
+    window.revogarLicencaAdmin = async function(email) {
       if (confirm(`Revogar acesso de ${email}?`)) {
-        revogarLicenca(email);
+        await revogarLicenca(email);
         refresh();
       }
     };

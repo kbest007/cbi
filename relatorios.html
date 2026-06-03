@@ -84,16 +84,13 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-family: var(--m
 
 <script>
 // ── PROTEÇÃO DE LICENÇA ──────────────────────────────────────────
-(function() {
+(async function() {
     const email = localStorage.getItem('cbi_email_sessao');
     if (!email) { window.location.href = 'login.html'; return; }
     if (typeof window.CBI_LICENCA !== 'undefined' && email !== window.CBI_LICENCA.ADMIN_EMAIL) {
-        const lic = window.CBI_LICENCA.verificarLicenca(email);
+        const lic = await window.CBI_LICENCA.verificarLicenca(email);
         if (!lic.ativa) {
-            document.addEventListener('DOMContentLoaded', () => {
-                document.body.style.cssText = 'background:#020617;';
-                document.body.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-content:center;"><div style="text-align:center;color:white;font-family:Inter,sans-serif;"><div style="font-size:48px;margin-bottom:16px;">🔒</div><h2 style="font-size:22px;font-weight:800;margin-bottom:8px;">Licença inativa</h2><p style="color:#94a3b8;margin-bottom:24px;">Fale com o administrador para reativar seu acesso.</p><button onclick="window.location.href=\'login.html\'" style="padding:12px 24px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Voltar ao Login</button></div></div>';
-            });
+            window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo);
         }
     }
 })();

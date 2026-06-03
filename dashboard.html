@@ -140,193 +140,33 @@ body{ background:#020617; color:white; min-height:100vh; }
   </div>
 </div>
 
+<script src="licenca.js"></script>
 <script>
 // ================================================================
-//  SISTEMA DE LICENÇA — embutido
+//  INICIALIZAÇÃO: verifica sessão e licença (via licenca.js / Supabase)
 // ================================================================
-const ADMIN_EMAIL = 'cbest07@gmail.com';
-const TRIAL_DIAS  = 7;
-const LS_KEY      = 'cbi_licencas';
-const LS_SESSAO   = 'cbi_email_sessao';
-
-function lerLicencas(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch{ return {}; } }
-function salvarLicencas(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); }
-
-function diasRestantes(exp){ return Math.ceil((new Date(exp)-new Date())/(1000*60*60*24)); }
-function dataExpiracaoPara(dias){ const d=new Date(); d.setDate(d.getDate()+dias); return d.toISOString(); }
-function formatarData(iso){ return new Date(iso).toLocaleDateString('pt-BR'); }
-
-function ativarTrial(email){
-  const lic=lerLicencas();
-  if(lic[email]) return;
-  lic[email]={ email, tipo:'trial', liberadoEm:new Date().toISOString(), expiracao:dataExpiracaoPara(TRIAL_DIAS) };
-  salvarLicencas(lic);
-}
-
-function liberarLicenca(email, dataFim){
-  const lic=lerLicencas();
-  lic[email]={ email, tipo:'ativa', liberadoEm:new Date().toISOString(), expiracao: dataFim ? new Date(dataFim).toISOString() : dataExpiracaoPara(30) };
-  salvarLicencas(lic);
-}
-
-function revogarLicenca(email){ const lic=lerLicencas(); delete lic[email]; salvarLicencas(lic); }
-
-function verificarLicenca(email){
-  const lic=lerLicencas()[email];
-  if(!lic) return { ativa:false, motivo:'Sem licença cadastrada.', semLicenca:true };
-  const restam=diasRestantes(lic.expiracao);
-  if(restam<=0) return { ativa:false, motivo: lic.tipo==='trial' ? 'Seu período de teste gratuito encerrou.' : 'Sua licença expirou.', tipo:lic.tipo };
-  return { ativa:true, restam, tipo:lic.tipo, expiracao:lic.expiracao };
-}
-
-function mostrarBloqueio(email, motivo, tipo){
-  const isTrial = tipo==='trial';
-  document.body.innerHTML = `
-    <style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
-    body{background:#020617;min-height:100vh;display:flex;align-items:center;justify-content:center;}
-    .glow{position:fixed;width:600px;height:600px;background:${isTrial?'#7c3aed':'#dc2626'};opacity:.08;filter:blur(160px);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);}
-    .card{background:rgba(15,23,42,.9);border:1px solid ${isTrial?'rgba(124,58,237,.25)':'rgba(220,38,38,.2)'};border-radius:28px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;z-index:2;}
-    .btn{padding:14px 28px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;}</style>
-    <div class="glow"></div>
-    <div class="card">
-      <div style="font-size:52px;margin-bottom:20px;">${isTrial?'⏰':'🔒'}</div>
-      <h2 style="color:white;font-size:24px;font-weight:800;margin-bottom:10px;">${isTrial?'Período de Teste Encerrado':'Acesso Restrito'}</h2>
-      <div style="color:${isTrial?'#a78bfa':'#ef4444'};font-weight:600;font-size:13px;background:${isTrial?'rgba(124,58,237,.12)':'rgba(220,38,38,.1)'};padding:8px 16px;border-radius:10px;display:inline-block;margin:12px 0;">${email}</div>
-      <p style="color:${isTrial?'#c4b5fd':'#fca5a5'};font-size:13px;margin-bottom:8px;font-weight:600;">${motivo}</p>
-      <p style="color:#64748b;font-size:13px;margin-bottom:28px;line-height:1.6;">${isTrial?'Seu trial gratuito de 7 dias chegou ao fim. Entre em contato com o administrador para assinar o plano.':'Entre em contato com o administrador para reativar seu acesso.'}</p>
-      <button class="btn" onclick="localStorage.removeItem('${LS_SESSAO}');window.location.href='login.html'">Voltar ao Login</button>
-      <p style="margin-top:20px;color:#475569;font-size:12px;">CBI — Controle de Banca Inteligente</p>
-    </div>`;
-}
-
-function renderizarPainelAdmin(){
-  const container = document.getElementById('licencaAdminContainer');
-  if(!container) return;
-
-  function refresh(){
-    const licencas = lerLicencas();
-    const entradas = Object.values(licencas);
-    const hoje = new Date().toISOString().split('T')[0];
-    const padrao30 = new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0];
-
-    const linhas = entradas.map(l => {
-      const restam = diasRestantes(l.expiracao);
-      const exp = restam<=0;
-      const cor = exp?'#ff4d6d':restam<=3?'#f59e0b':'#00e5a0';
-      const stxt = exp?(l.tipo==='trial'?'Trial expirado':'Expirada'):`${restam} dia(s)`;
-      const badge = l.tipo==='trial'
-        ? `<span style="font-size:10px;background:rgba(124,58,237,.2);color:#a78bfa;padding:2px 8px;border-radius:6px;font-weight:700;margin-left:6px;">TRIAL</span>`
-        : `<span style="font-size:10px;background:rgba(0,229,160,.1);color:#00e5a0;padding:2px 8px;border-radius:6px;font-weight:700;margin-left:6px;">ATIVA</span>`;
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="display:flex;align-items:center;color:white;font-size:13px;font-weight:600;">${l.email}${badge}</div>
-          <div style="color:#64748b;font-size:12px;margin-top:3px;">Expira: ${formatarData(l.expiracao)}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="color:${cor};font-size:12px;font-weight:700;">${stxt}</span>
-          <button onclick="abrirModalRenovar('${l.email}')" style="padding:6px 12px;background:rgba(79,70,229,.2);border:1px solid rgba(79,70,229,.4);color:#818cf8;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;">Renovar</button>
-          <button onclick="revogarAdmin('${l.email}')" style="padding:6px 12px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#ef4444;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;">Revogar</button>
-        </div>
-      </div>`;
-    }).join('');
-
-    container.innerHTML = `
-      <div style="background:#071226;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px;margin-bottom:16px;">
-        <h3 style="font-size:16px;font-weight:800;color:white;margin-bottom:6px;">🔑 Liberar Nova Licença</h3>
-        <p style="color:#94a3b8;font-size:13px;margin-bottom:18px;">Digite o e-mail do usuário e escolha até quando a licença será válida.</p>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <input id="adminEmailInput" type="email" placeholder="email@usuario.com"
-            style="padding:13px 16px;background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;width:100%;">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-            <div style="flex:1;min-width:160px;">
-              <label style="color:#64748b;font-size:12px;display:block;margin-bottom:6px;">Data de expiração</label>
-              <input id="adminDataFim" type="date" min="${hoje}" value="${padrao30}"
-                style="width:100%;padding:12px 14px;background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;color-scheme:dark;">
-            </div>
-            <button onclick="liberarAdmin()"
-              style="padding:13px 22px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">
-              ✓ Liberar Acesso
-            </button>
-          </div>
-        </div>
-        <div id="adminMsg" style="margin-top:12px;font-size:13px;display:none;padding:10px 14px;border-radius:10px;"></div>
-      </div>
-
-      <!-- MODAL RENOVAR -->
-      <div id="modalRenovar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;width:100%;max-width:380px;margin:20px;">
-          <h3 style="color:white;font-size:16px;font-weight:800;margin-bottom:6px;">Renovar Licença</h3>
-          <p id="modalLabel" style="color:#94a3b8;font-size:13px;margin-bottom:18px;"></p>
-          <label style="color:#64748b;font-size:12px;display:block;margin-bottom:6px;">Nova data de expiração</label>
-          <input id="modalDataFim" type="date" min="${hoje}" value="${padrao30}"
-            style="width:100%;padding:12px 14px;background:#020617;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;color-scheme:dark;margin-bottom:16px;">
-          <div style="display:flex;gap:10px;">
-            <button onclick="fecharModal()" style="flex:1;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:12px;font-size:14px;cursor:pointer;font-weight:600;">Cancelar</button>
-            <button onclick="confirmarRenovar()" style="flex:1;padding:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:white;border-radius:12px;font-size:14px;cursor:pointer;font-weight:700;">Confirmar</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="background:#071226;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px;">
-        <h3 style="font-size:16px;font-weight:800;color:white;margin-bottom:4px;">📋 Usuários no Sistema</h3>
-        <p style="color:#94a3b8;font-size:13px;margin-bottom:18px;">Trials e licenças ativas.</p>
-        ${entradas.length===0?'<p style="color:#64748b;font-size:13px;padding:16px 0;">Nenhum usuário cadastrado ainda.</p>':linhas}
-      </div>`;
-  }
-
-  let _emailRenovar='';
-
-  window.liberarAdmin = function(){
-    const email=(document.getElementById('adminEmailInput').value||'').trim().toLowerCase();
-    const dataFim=document.getElementById('adminDataFim').value;
-    const msg=document.getElementById('adminMsg');
-    if(!email||!email.includes('@')){ msg.style.display='block';msg.style.background='rgba(220,38,38,.1)';msg.style.color='#fca5a5';msg.textContent='⚠ Digite um e-mail válido.';return; }
-    if(!dataFim){ msg.style.display='block';msg.style.background='rgba(220,38,38,.1)';msg.style.color='#fca5a5';msg.textContent='⚠ Selecione uma data de expiração.';return; }
-    liberarLicenca(email, dataFim);
-    document.getElementById('adminEmailInput').value='';
-    msg.style.display='block';msg.style.background='rgba(0,229,160,.08)';msg.style.color='#86efac';
-    msg.textContent='✓ Licença liberada para '+email+' até '+new Date(dataFim).toLocaleDateString('pt-BR');
-    setTimeout(()=>{ msg.style.display='none'; },5000);
-    refresh();
-  };
-
-  window.abrirModalRenovar = function(email){
-    _emailRenovar=email;
-    document.getElementById('modalLabel').textContent=email;
-    document.getElementById('modalRenovar').style.display='flex';
-  };
-  window.fecharModal = function(){ document.getElementById('modalRenovar').style.display='none'; };
-  window.confirmarRenovar = function(){
-    const data=document.getElementById('modalDataFim').value;
-    if(!data) return;
-    liberarLicenca(_emailRenovar, data);
-    fecharModal(); refresh();
-  };
-  window.revogarAdmin = function(email){
-    if(confirm('Revogar acesso de '+email+'?')){ revogarLicenca(email); refresh(); }
-  };
-
-  refresh();
-}
-
-// ================================================================
-//  INICIALIZAÇÃO: verifica sessão e licença
-// ================================================================
-(function init(){
-  const email = localStorage.getItem(LS_SESSAO);
+(async function init(){
+  const email = localStorage.getItem('cbi_email_sessao');
 
   if(!email){ window.location.href='login.html'; return; }
+
+  const ADMIN_EMAIL = window.CBI_LICENCA.ADMIN_EMAIL;
 
   document.getElementById('userLabel').textContent = email===ADMIN_EMAIL ? '👑 Administrador' : email.split('@')[0];
 
   if(email===ADMIN_EMAIL){
     document.getElementById('painelAdmin').style.display='block';
-    renderizarPainelAdmin();
+    window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
     return;
   }
 
-  const lic = verificarLicenca(email);
-  if(!lic.ativa){ mostrarBloqueio(email, lic.motivo, lic.tipo); return; }
+  const lic = await window.CBI_LICENCA.verificarLicenca(email);
+  if(!lic.ativa){
+    window.CBI_LICENCA.mostrarTelaAcessoBloqueado
+      ? window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo)
+      : (document.body.innerHTML='<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:white;font-family:Inter,sans-serif;"><p>'+lic.motivo+'</p></div>');
+    return;
+  }
 
   // Banner de licença
   const aviso = document.getElementById('avisoLicenca');
@@ -370,9 +210,7 @@ function zerarDados(){
 
 function logout(){
   if(confirm('Tem certeza de que deseja sair?')){
-    const lic=localStorage.getItem(LS_KEY);
     localStorage.clear();
-    if(lic) localStorage.setItem(LS_KEY,lic); // mantém licenças ao sair
     document.body.innerHTML='<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#020617;color:white;font-family:Inter,sans-serif;"><h2 style="font-size:32px;font-weight:800;margin-bottom:10px;">Sistema Encerrado</h2><p style="color:#94a3b8;font-size:16px;">Redirecionando para login em 2 segundos...</p></div>';
     setTimeout(()=>{ window.location.href='login.html'; },2000);
   }
