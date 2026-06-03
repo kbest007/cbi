@@ -21,6 +21,7 @@ async function supaFetch(path, method = 'GET', body = null) {
   return text ? JSON.parse(text) : null;
 }
 
+// ── PERFIL (banca inicial) ──────────────────────────────────
 async function getPerfil(userId) {
   const rows = await supaFetch(`perfis?id=eq.${userId}&select=*`);
   return rows && rows.length > 0 ? rows[0] : null;
@@ -35,6 +36,7 @@ async function salvarPerfil(userId, email, saldoInicial) {
   }
 }
 
+// ── OPERAÇÕES ──────────────────────────────────────────────
 async function getOperacoes(userId) {
   const rows = await supaFetch(`operacoes?user_id=eq.${userId}&order=created_at.asc&select=*`);
   return rows || [];
@@ -57,6 +59,7 @@ async function deletarOperacoes(userId) {
   await supaFetch(`operacoes?user_id=eq.${userId}`, 'DELETE');
 }
 
+// ── SESSÃO ──────────────────────────────────────────────────
 async function getSession() {
   try {
     const res = await fetch(SUPA_URL + '/auth/v1/user', {
@@ -67,4 +70,5 @@ async function getSession() {
   } catch { return null; }
 }
 
+// Namespace para ser acessível globalmente
 window.CBI_DB = { getPerfil, salvarPerfil, getOperacoes, inserirOperacao, deletarOperacoes, getSession, supaFetch };
