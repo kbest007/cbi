@@ -210,7 +210,7 @@ function zerarDados(){
 
 function logout(){
   if(confirm('Tem certeza de que deseja sair?')){
-    localStorage.clear();
+    localStorage.removeItem('cbi_email_sessao');
     document.body.innerHTML='<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#020617;color:white;font-family:Inter,sans-serif;"><h2 style="font-size:32px;font-weight:800;margin-bottom:10px;">Sistema Encerrado</h2><p style="color:#94a3b8;font-size:16px;">Redirecionando para login em 2 segundos...</p></div>';
     setTimeout(()=>{ window.location.href='login.html'; },2000);
   }

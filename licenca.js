@@ -123,7 +123,7 @@ function mostrarTelaAcessoBloqueado(email, motivo, tipo) {
           <p style="color:#64748b;font-size:12px;margin-bottom:4px;">Conta</p>
           <p style="color:#818cf8;font-size:14px;font-weight:600;">${email}</p>
         </div>
-        <button onclick="localStorage.clear();window.location.href='login.html'"
+        <button onclick="localStorage.removeItem('cbi_email_sessao');window.location.href='login.html'"
           style="width:100%;padding:14px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;">
           Voltar ao Login
         </button>
