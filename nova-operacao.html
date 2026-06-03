@@ -290,9 +290,6 @@ button:hover, .btn-link-action:hover { opacity: 0.88; }
 <div class="toast" id="toast"></div>
 
 <script>
-<script src="licenca.js"></script>
-<script src="supabase.js"></script>
-<script>
 // ── PROTEÇÃO DE LICENÇA ──────────────────────────────────────────
 (async function() {
     const email = localStorage.getItem('cbi_email_sessao');
@@ -422,28 +419,23 @@ function atualizar() {
   }
 }
 
-async function salvarOperacao() {
+function salvarOperacao() {
   var tiro  = document.querySelector('input[name="tiro"]:checked');
   var total = resPrincipal + resOpcionais;
-  var userId = localStorage.getItem('cbi_user_id');
-
-  if(!userId){ toast('Sessão expirada. Faça login novamente.', 'red'); return; }
-  if(!tiro){ toast('Selecione o resultado da entrada!', 'red'); return; }
-
-  try {
-    await window.CBI_DB.inserirOperacao(userId, {
-      tipo: tiro.value,
-      valor: total,
-      mercado: document.getElementById('descPrincipal').value || null,
-      descricao: document.getElementById('descPrincipal').value || tiro.value,
-      resultado_principal: resPrincipal,
-      resultado_opcionais: resOpcionais
-    });
-    toast('✅ Operação salva!');
-    setTimeout(function(){ location.reload(); }, 2000);
-  } catch(e) {
-    toast('Erro ao salvar: ' + e.message, 'red');
-  }
+  var payload = {
+    id: Date.now().toString(),
+    data: new Date().toISOString(),
+    tiro: tiro ? tiro.value : 'Não informado',
+    descricao: document.getElementById('descPrincipal').value || '',
+    resultadoPrincipal: resPrincipal,
+    resultadoOpcionais: resOpcionais,
+    resultadoFinal: total,
+    historico: historico_log
+  };
+  var lista = JSON.parse(localStorage.getItem('operacoes') || '[]');
+  lista.push(payload);
+  localStorage.setItem('operacoes', JSON.stringify(lista));
+  toast('✅ Operação salva!');
 }
 
 function confirmarLimpar() { if (confirm('Limpar todos os dados?')) location.reload(); }

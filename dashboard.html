@@ -141,162 +141,70 @@ body{ background:#020617; color:white; min-height:100vh; }
 </div>
 
 <script src="licenca.js"></script>
-<script src="supabase.js"></script>
 <script>
 // ================================================================
-//  DASHBOARD — dados via Supabase
+//  INICIALIZAÇÃO: verifica sessão e licença (via licenca.js / Supabase)
 // ================================================================
-
-let _userId = null;
-let _email  = null;
-let _bancaInicial = 0;
-
 (async function init(){
-  _email  = localStorage.getItem('cbi_email_sessao');
-  _userId = localStorage.getItem('cbi_user_id');
+  const email = localStorage.getItem('cbi_email_sessao');
 
-  if(!_email){ window.location.href='login.html'; return; }
+  if(!email){ window.location.href='login.html'; return; }
 
   const ADMIN_EMAIL = window.CBI_LICENCA.ADMIN_EMAIL;
-  document.getElementById('userLabel').textContent = _email===ADMIN_EMAIL ? '👑 Administrador' : _email.split('@')[0];
 
-  if(_email===ADMIN_EMAIL){
+  document.getElementById('userLabel').textContent = email===ADMIN_EMAIL ? '👑 Administrador' : email.split('@')[0];
+
+  if(email===ADMIN_EMAIL){
     document.getElementById('painelAdmin').style.display='block';
     window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
     return;
   }
 
-  const lic = await window.CBI_LICENCA.verificarLicenca(_email);
+  const lic = await window.CBI_LICENCA.verificarLicenca(email);
   if(!lic.ativa){
-    window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo);
+    window.CBI_LICENCA.mostrarTelaAcessoBloqueado
+      ? window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo)
+      : (document.body.innerHTML='<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:white;font-family:Inter,sans-serif;"><p>'+lic.motivo+'</p></div>');
     return;
   }
 
-  // Banner licença
-  const aviso   = document.getElementById('avisoLicenca');
+  // Banner de licença
+  const aviso = document.getElementById('avisoLicenca');
   const isTrial = lic.tipo==='trial';
   const urgente = lic.restam<=2;
-  const cor = urgente?'#ff4d6d':isTrial?'#a78bfa':'#00e5a0';
-  const bg  = urgente?'rgba(255,77,109,.08)':isTrial?'rgba(124,58,237,.08)':'rgba(0,229,160,.08)';
-  const bor = urgente?'rgba(255,77,109,.25)':isTrial?'rgba(124,58,237,.25)':'rgba(0,229,160,.25)';
-  const msgt = (urgente&&isTrial)
-    ? '⚠ Seu trial encerra em <strong>'+lic.restam+' dia(s)</strong>. Contate o administrador.'
-    : (isTrial?'🆓 Trial gratuito':'✅ Licença ativa')+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
+  const cor  = urgente?'#ff4d6d':isTrial?'#a78bfa':'#00e5a0';
+  const bg   = urgente?'rgba(255,77,109,.08)':isTrial?'rgba(124,58,237,.08)':'rgba(0,229,160,.08)';
+  const bor  = urgente?'rgba(255,77,109,.25)':isTrial?'rgba(124,58,237,.25)':'rgba(0,229,160,.25)';
+  const label= isTrial?'🆓 Trial gratuito':'✅ Licença ativa';
+  const msgt = urgente&&isTrial
+    ? '⚠ Seu trial encerra em <strong>'+lic.restam+' dia(s)</strong>. Contate o administrador para assinar o plano.'
+    : label+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
   aviso.style.display='block';
   aviso.innerHTML='<div style="background:'+bg+';border:1px solid '+bor+';border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;"><span style="color:'+cor+';font-size:14px;font-weight:600;">'+msgt+'</span>'+(urgente?'<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>':'')+'</div>';
-
-  await carregarDashboard();
 })();
 
-async function carregarDashboard(){
-  if(!_userId) return;
-  try {
-    // Banca inicial
-    const perfil = await window.CBI_DB.getPerfil(_userId);
-    _bancaInicial = perfil ? parseFloat(perfil.saldo_inicial||0) : 0;
-    const elBanca = document.getElementById('inputBancaInicial');
-    if(elBanca) elBanca.placeholder = 'Banca Atual: R$ ' + _bancaInicial.toFixed(2);
-
-    // Operações
-    const operacoes = await window.CBI_DB.getOperacoes(_userId);
-    calcularStats(operacoes);
-    renderFeed(operacoes);
-  } catch(e){ console.error('Erro ao carregar dashboard:', e); }
+// ================================================================
+//  GESTÃO DE BANCA
+// ================================================================
+function salvarBancaInicial(){
+  let valor=document.getElementById('inputBancaInicial').value;
+  if(valor){ localStorage.setItem('bancaInicial',valor); location.reload(); }
+  else alert('Por favor, informe um valor válido para a banca inicial.');
 }
 
-function calcularStats(operacoes){
-  let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
-  operacoes.forEach(op=>{
-    const val = parseFloat(op.valor||0);
-    const rp  = parseFloat(op.resultado_principal||0);
-    const ro  = parseFloat(op.resultado_opcionais||0);
-    lucroTotal   += val;
-    resPrincipal += rp;
-    resOpcionais += ro;
-    const t = op.tipo;
-    if(t==='Green 1º Tiro'){green1++;opValidas++;}
-    else if(t==='Green 2º Tiro'){green2++;opValidas++;}
-    else if(t==='Green 3º Tiro'){green3++;opValidas++;}
-    else if(t==='RED'){reds++;opValidas++;}
-    else if(t==='Reembolso'){reembolsos++;opValidas++;}
-    else if(t==='Aporte'||t==='Saque'){/* movimentação, não conta */}
-  });
-  const validos = opValidas - reembolsos;
-  const totalGreens = green1+green2+green3;
-  const assertividade = validos>0 ? Math.round((totalGreens/validos)*100) : 0;
-  const saldoAtual = _bancaInicial + lucroTotal;
-  const roi = _bancaInicial>0 ? Math.round((lucroTotal/_bancaInicial)*100) : 0;
-
-  setVal('saldoAtual', saldoAtual, false);
-  setVal('lucroTotal', lucroTotal, true);
-  document.getElementById('totalOperacoes').textContent = opValidas;
-  document.getElementById('assertividade').textContent  = assertividade+'%';
-  document.getElementById('green1').textContent = green1;
-  document.getElementById('green2').textContent = green2;
-  document.getElementById('green3').textContent = green3;
-  document.getElementById('reds').textContent   = reds;
-  setVal('resultadoPrincipal', resPrincipal, false);
-  setVal('resultadoOpcionais', resOpcionais, false);
-  setVal('resultadoFinal',     lucroTotal,   false);
-  const elRoi = document.getElementById('roi');
-  elRoi.textContent = (roi>=0?'+':'')+roi+'%';
-  elRoi.className   = 'card-value '+(roi>=0?'green':'red');
+function gerenciarBanca(tipo){
+  let valor=parseFloat(document.getElementById('valorMovimentacao').value);
+  if(isNaN(valor)||valor<=0) return alert('Por favor, digite um valor válido maior que zero.');
+  let operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
+  operacoes.push({ descricao:tipo==='aporte'?'Aporte de Capital':'Saque de Capital', resultadoFinal:tipo==='aporte'?valor:-valor, resultadoPrincipal:0, resultadoOpcionais:0, tiro:tipo==='aporte'?'Aporte':'Saque', data:new Date().toISOString() });
+  localStorage.setItem('operacoes',JSON.stringify(operacoes));
+  document.getElementById('valorMovimentacao').value='';
+  calcularEAtualizarDashboard();
 }
 
-function setVal(id, valor, sinal){
-  const el = document.getElementById(id); if(!el) return;
-  const s = sinal&&valor>0?'+':(valor<0?'-':'');
-  el.textContent = s+'R$ '+Math.abs(valor).toFixed(2).replace('.',',');
-  el.className = 'card-value '+(valor>0?'green':valor<0?'red':'');
-}
-
-function renderFeed(lista){
-  const c = document.getElementById('historicoLista'); if(!c) return;
-  const ult = [...lista].slice(-5).reverse();
-  if(ult.length===0){ c.innerHTML='<p style="color:#64748b;font-size:13px;padding:15px 0;">Nenhuma operação registrada.</p>'; return; }
-  c.innerHTML = ult.map(op=>{
-    const val = parseFloat(op.valor||0);
-    const cor = val>=0?'green':'red';
-    const s   = val>0?'+':'';
-    const nome = op.descricao || op.tipo;
-    return '<div class="history-item"><span>'+nome+'</span><span class="'+cor+'">'+s+'R$ '+Math.abs(val).toFixed(2).replace('.',',')+'</span></div>';
-  }).join('');
-}
-
-// ── GESTÃO DE BANCA ─────────────────────────────────────────
-async function salvarBancaInicial(){
-  const valor = parseFloat(document.getElementById('inputBancaInicial').value);
-  if(!valor || isNaN(valor)){ alert('Por favor, informe um valor válido.'); return; }
-  try {
-    await window.CBI_DB.salvarPerfil(_userId, _email, valor);
-    _bancaInicial = valor;
-    alert('Banca inicial atualizada!');
-    await carregarDashboard();
-  } catch(e){ alert('Erro ao salvar banca: '+e.message); }
-}
-
-async function gerenciarBanca(tipo){
-  const valor = parseFloat(document.getElementById('valorMovimentacao').value);
-  if(isNaN(valor)||valor<=0){ alert('Por favor, digite um valor válido maior que zero.'); return; }
-  try {
-    await window.CBI_DB.inserirOperacao(_userId, {
-      tipo: tipo==='aporte' ? 'Aporte' : 'Saque',
-      valor: tipo==='aporte' ? valor : -valor,
-      descricao: tipo==='aporte' ? 'Aporte de Capital' : 'Saque de Capital',
-      resultado_principal: 0,
-      resultado_opcionais: 0
-    });
-    document.getElementById('valorMovimentacao').value='';
-    await carregarDashboard();
-  } catch(e){ alert('Erro: '+e.message); }
-}
-
-async function zerarDados(){
+function zerarDados(){
   if(confirm('Tem certeza que deseja zerar todos os dados do painel? Esta ação não pode ser desfeita.')){
-    try {
-      await window.CBI_DB.deletarOperacoes(_userId);
-      await carregarDashboard();
-    } catch(e){ alert('Erro ao zerar dados: '+e.message); }
+    localStorage.removeItem('operacoes'); localStorage.removeItem('bancaInicial'); location.reload();
   }
 }
 
@@ -306,6 +214,49 @@ function logout(){
     document.body.innerHTML='<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#020617;color:white;font-family:Inter,sans-serif;"><h2 style="font-size:32px;font-weight:800;margin-bottom:10px;">Sistema Encerrado</h2><p style="color:#94a3b8;font-size:16px;">Redirecionando para login em 2 segundos...</p></div>';
     setTimeout(()=>{ window.location.href='login.html'; },2000);
   }
+}
+
+document.addEventListener('DOMContentLoaded', calcularEAtualizarDashboard);
+
+function calcularEAtualizarDashboard(){
+  try{
+    const operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
+    let BANCA_INICIAL=parseFloat(localStorage.getItem('bancaInicial')||'0');
+    if(document.getElementById('inputBancaInicial')) document.getElementById('inputBancaInicial').placeholder='Banca Atual: R$ '+BANCA_INICIAL.toFixed(2);
+    let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
+    operacoes.forEach(op=>{
+      lucroTotal+=op.resultadoFinal||0; resPrincipal+=op.resultadoPrincipal||0; resOpcionais+=op.resultadoOpcionais||0;
+      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;}
+    });
+    let totalGreens=green1+green2+green3, validos=opValidas-reembolsos;
+    let assertividade=validos>0?Math.round((totalGreens/validos)*100):0;
+    let saldoAtual=BANCA_INICIAL+lucroTotal, roi=BANCA_INICIAL>0?Math.round((lucroTotal/BANCA_INICIAL)*100):0;
+    setVal('saldoAtual',saldoAtual,false); setVal('lucroTotal',lucroTotal,true);
+    document.getElementById('totalOperacoes').textContent=opValidas;
+    document.getElementById('assertividade').textContent=assertividade+'%';
+    document.getElementById('green1').textContent=green1; document.getElementById('green2').textContent=green2;
+    document.getElementById('green3').textContent=green3; document.getElementById('reds').textContent=reds;
+    setVal('resultadoPrincipal',resPrincipal,false); setVal('resultadoOpcionais',resOpcionais,false); setVal('resultadoFinal',lucroTotal,false);
+    let elRoi=document.getElementById('roi'); elRoi.textContent=(roi>=0?'+':'')+roi+'%'; elRoi.className='card-value '+(roi>=0?'green':'red');
+    renderFeed(operacoes);
+  }catch(e){ console.error(e); }
+}
+
+function setVal(id,valor,sinal){
+  let el=document.getElementById(id); if(!el) return;
+  let s=sinal&&valor>0?'+':(valor<0?'-':'');
+  el.textContent=s+'R$ '+Math.abs(valor).toFixed(2).replace('.',',');
+  el.className='card-value '+(valor>0?'green':valor<0?'red':'');
+}
+
+function renderFeed(lista){
+  let c=document.getElementById('historicoLista'); if(!c) return;
+  let ult=[...lista].slice(-5).reverse();
+  if(ult.length===0){ c.innerHTML='<p style="color:#64748b;font-size:13px;padding:15px 0;">Nenhuma entrada gravada.</p>'; return; }
+  c.innerHTML=ult.map(op=>{
+    let cor=op.resultadoFinal>=0?'green':'red', s=op.resultadoFinal>0?'+':'';
+    return '<div class="history-item"><span>'+(op.descricao||op.tiro)+'</span><span class="'+cor+'">'+s+'R$ '+Math.abs(op.resultadoFinal).toFixed(2).replace('.',',')+'</span></div>';
+  }).join('');
 }
 </script>
 </body>
