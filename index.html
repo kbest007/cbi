@@ -253,6 +253,8 @@ Versão 1.0
 
 </div>
 
+<script src="licenca.js"></script>
+
 <script type="module">
 
 import { createClient }
@@ -331,8 +333,15 @@ mensagem(error.message,'error')
 return
 }
 
+// Ativa trial de 7 dias automaticamente no Supabase
+try {
+  await window.CBI_LICENCA.ativarTrial(email.trim().toLowerCase());
+} catch(e) {
+  console.warn('Erro ao ativar trial:', e);
+}
+
 mensagem(
-'Conta criada com sucesso. Verifique seu email.',
+'Conta criada! Você tem 7 dias gratuitos de acesso. Verifique seu email para confirmar.',
 'success'
 )
 
