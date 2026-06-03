@@ -28,7 +28,6 @@ async function getPerfil(userId) {
 }
 
 async function salvarPerfil(userId, email, saldoInicial) {
-  // Tenta atualizar, se não existir insere
   const existe = await getPerfil(userId);
   if (existe) {
     await supaFetch(`perfis?id=eq.${userId}`, 'PATCH', { saldo_inicial: saldoInicial, updated_at: new Date().toISOString() });
@@ -44,7 +43,6 @@ async function getOperacoes(userId) {
 }
 
 async function inserirOperacao(userId, dados) {
-  // dados: { tipo, valor, mercado, resultado_principal, resultado_opcionais, descricao }
   await supaFetch('operacoes', 'POST', {
     user_id: userId,
     tipo: dados.tipo,
@@ -62,7 +60,6 @@ async function deletarOperacoes(userId) {
 }
 
 // ── SESSÃO ──────────────────────────────────────────────────
-// Busca user_id da sessão Supabase Auth via REST
 async function getSession() {
   try {
     const res = await fetch(SUPA_URL + '/auth/v1/user', {
@@ -73,4 +70,5 @@ async function getSession() {
   } catch { return null; }
 }
 
+// Namespace para ser acessível globalmente
 window.CBI_DB = { getPerfil, salvarPerfil, getOperacoes, inserirOperacao, deletarOperacoes, getSession, supaFetch };
