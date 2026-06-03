@@ -373,10 +373,14 @@ mensagem(
 
 const { data } = await supabase.auth.getSession()
 
-if(data.session){
-// Persiste o e-mail para verificação de licença
+// Só redireciona automaticamente se o usuário não fez logout explícito
+// (cbi_email_sessao é removido no logout, então sua ausência indica saída intencional)
+if(data.session && localStorage.getItem('cbi_email_sessao')){
 localStorage.setItem('cbi_email_sessao', data.session.user.email.trim().toLowerCase())
 window.location.href='dashboard.html'
+} else if(data.session && !localStorage.getItem('cbi_email_sessao')){
+// Sessão Supabase existe mas usuário fez logout — encerra a sessão no Supabase também
+await supabase.auth.signOut()
 }
 
 </script>

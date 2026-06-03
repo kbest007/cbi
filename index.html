@@ -370,8 +370,10 @@ mensagem(
 
 const { data } = await supabase.auth.getSession()
 
-if(data.session){
+if(data.session && localStorage.getItem('cbi_email_sessao')){
 window.location.href='dashboard.html'
+} else if(data.session && !localStorage.getItem('cbi_email_sessao')){
+await supabase.auth.signOut()
 }
 
 </script>
