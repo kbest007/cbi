@@ -4,602 +4,422 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Banca Inteligente — Dashboard</title>
-
-<script src="licenca.js"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Inter',sans-serif;
-}
-body{
-    background:#020617;
-    color:white;
-    min-height:100vh;
-}
-.bg{
-    position:fixed;
-    inset:0;
-    background:
-        radial-gradient(circle at top left,#4338ca30,transparent 35%),
-        radial-gradient(circle at bottom right,#2563eb20,transparent 35%);
-    z-index:-1;
-}
-.header{
-    height:80px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 40px;
-    border-bottom:1px solid rgba(255,255,255,.05);
-    backdrop-filter:blur(10px);
-}
-.logo{
-    display:flex;
-    align-items:center;
-    gap:14px;
-}
-.logo-icon{
-    width:48px;
-    height:48px;
-    border-radius:14px;
-    background:linear-gradient(135deg,#4f46e5,#2563eb);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-    font-weight:900;
-}
-.logo-text h2{
-    font-size:18px;
-    font-weight:800;
-}
-.logo-text p{
-    font-size:11px;
-    color:#94a3b8;
-    letter-spacing:1px;
-    text-transform:uppercase;
-}
-
-/* BARRA DE NAVEGAÇÃO PROFISSIONAL */
-.nav-links {
-    display: flex;
-    gap: 12px;
-}
-.nav-item {
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 16px;
-    border-radius: 12px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid transparent;
-}
-.nav-item:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.04);
-}
-.nav-item.active {
-    background: rgba(79, 70, 229, 0.15);
-    color: #818cf8;
-    border-color: rgba(79, 70, 229, 0.3);
-}
-
-.user-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.user {
-    background:#0f172a;
-    border:1px solid rgba(255,255,255,.05);
-    padding:12px 18px;
-    border-radius:14px;
-    font-size:13px;
-    font-weight: 500;
-}
-
-.btn-sair {
-    padding: 12px 18px;
-    background: rgba(220, 38, 38, 0.1);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    color: #ef4444;
-    border-radius: 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.btn-sair:hover {
-    background: #dc2626;
-    color: white;
-}
-
-.container{
-    max-width:1400px;
-    margin:auto;
-    padding:35px;
-}
-.welcome{
-    margin-bottom:30px;
-}
-.welcome h1{
-    font-size:34px;
-    font-weight:800;
-}
-.welcome p{
-    color:#94a3b8;
-    margin-top:8px;
-}
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:20px;
-    margin-bottom:30px;
-}
-.card{
-    background:#071226;
-    border:1px solid rgba(255,255,255,.05);
-    border-radius:24px;
-    padding:24px;
-}
-.card-title{
-    font-size:13px;
-    color:#94a3b8;
-    margin-bottom:10px;
-    text-transform:uppercase;
-}
-.card-value{
-    font-size:34px;
-    font-weight:800;
-}
-.green{color:#00e5a0;}
-.red{color:#ff4d6d;}
-.muted{color:#64748b;}
-.main{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-}
-.panel{
-    background:#071226;
-    border:1px solid rgba(255,255,255,.05);
-    border-radius:24px;
-    padding:25px;
-}
-.panel h3{
-    margin-bottom:20px;
-    font-size:20px;
-}
-.button{
-    width:100%;
-    padding:18px;
-    border:none;
-    border-radius:16px;
-    background:linear-gradient(135deg,#4f46e5,#4338ca);
-    color:white;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.3s;
-}
-.button:hover{
-    transform:translateY(-2px);
-}
-.history-container {
-    min-height: 160px;
-}
-.history-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:14px 0;
-    border-bottom:1px solid rgba(255,255,255,.05);
-    font-size:14px;
-}
-.history-item:last-of-type {
-    border-bottom: none;
-}
-.logout-panel{
-    margin-top:20px;
-    background: transparent;
-    border: 1px solid #dc2626;
-    color: #ef4444;
-}
-.logout-panel:hover {
-    background: #dc2626;
-    color: white;
-}
-
-.input-gestao {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.1);
-    background: #0f172a;
-    color: white;
-    font-size: 14px;
-}
-
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+body{ background:#020617; color:white; min-height:100vh; }
+.bg{ position:fixed; inset:0; background: radial-gradient(circle at top left,#4338ca30,transparent 35%), radial-gradient(circle at bottom right,#2563eb20,transparent 35%); z-index:-1; }
+.header{ height:80px; display:flex; align-items:center; justify-content:space-between; padding:0 40px; border-bottom:1px solid rgba(255,255,255,.05); backdrop-filter:blur(10px); }
+.logo{ display:flex; align-items:center; gap:14px; }
+.logo-icon{ width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg,#4f46e5,#2563eb); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; }
+.logo-text h2{ font-size:18px; font-weight:800; }
+.logo-text p{ font-size:11px; color:#94a3b8; letter-spacing:1px; text-transform:uppercase; }
+.nav-links{ display:flex; gap:12px; }
+.nav-item{ color:#94a3b8; text-decoration:none; font-size:13px; font-weight:600; padding:10px 16px; border-radius:12px; transition:all 0.2s; display:flex; align-items:center; gap:6px; border:1px solid transparent; }
+.nav-item:hover{ color:white; background:rgba(255,255,255,.04); }
+.nav-item.active{ background:rgba(79,70,229,.15); color:#818cf8; border-color:rgba(79,70,229,.3); }
+.user-area{ display:flex; align-items:center; gap:12px; }
+.user{ background:#0f172a; border:1px solid rgba(255,255,255,.05); padding:12px 18px; border-radius:14px; font-size:13px; font-weight:500; }
+.btn-sair{ padding:12px 18px; background:rgba(220,38,38,.1); border:1px solid rgba(220,38,38,.3); color:#ef4444; border-radius:14px; cursor:pointer; font-size:13px; font-weight:600; transition:all 0.2s; }
+.btn-sair:hover{ background:#dc2626; color:white; }
+.container{ max-width:1400px; margin:auto; padding:35px; }
+.welcome{ margin-bottom:30px; }
+.welcome h1{ font-size:34px; font-weight:800; }
+.welcome p{ color:#94a3b8; margin-top:8px; }
+.cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-bottom:30px; }
+.card{ background:#071226; border:1px solid rgba(255,255,255,.05); border-radius:24px; padding:24px; }
+.card-title{ font-size:13px; color:#94a3b8; margin-bottom:10px; text-transform:uppercase; }
+.card-value{ font-size:34px; font-weight:800; }
+.green{ color:#00e5a0; } .red{ color:#ff4d6d; } .muted{ color:#64748b; }
+.main{ display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+.panel{ background:#071226; border:1px solid rgba(255,255,255,.05); border-radius:24px; padding:25px; }
+.panel h3{ margin-bottom:20px; font-size:20px; }
+.button{ width:100%; padding:18px; border:none; border-radius:16px; background:linear-gradient(135deg,#4f46e5,#4338ca); color:white; font-size:16px; font-weight:700; cursor:pointer; transition:.3s; }
+.button:hover{ transform:translateY(-2px); }
+.history-container{ min-height:160px; }
+.history-item{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:14px; }
+.history-item:last-of-type{ border-bottom:none; }
+.logout-panel{ margin-top:20px; background:transparent; border:1px solid #dc2626; color:#ef4444; }
+.logout-panel:hover{ background:#dc2626; color:white; }
+.input-gestao{ flex:1; padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#0f172a; color:white; font-size:14px; }
 @media(max-width:900px){
-    .main{grid-template-columns:1fr;}
-    .header{padding:20px; height: auto; flex-direction: column; gap: 16px; align-items: flex-start;}
-    .nav-links{width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 6px;}
-    .nav-item{padding: 8px 12px; font-size: 12px;}
-    .container{padding:20px;}
+  .main{ grid-template-columns:1fr; }
+  .header{ padding:20px; height:auto; flex-direction:column; gap:16px; align-items:flex-start; }
+  .nav-links{ width:100%; justify-content:flex-start; flex-wrap:wrap; gap:6px; }
+  .nav-item{ padding:8px 12px; font-size:12px; }
+  .container{ padding:20px; }
 }
 </style>
 </head>
-
 <body>
-
 <div class="bg"></div>
 
 <header class="header">
-    <div class="logo">
-        <div class="logo-icon">📈</div>
-        <div class="logo-text">
-            <h2>Controle de Banca</h2>
-            <p>Dashboard Premium</p>
-        </div>
+  <div class="logo">
+    <div class="logo-icon">📈</div>
+    <div class="logo-text">
+      <h2>Controle de Banca</h2>
+      <p>Dashboard Premium</p>
     </div>
-
-    <nav class="nav-links">
-        <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
-        <a href="nova-operacao.html" class="nav-item">＋ Nova Operação</a>
-        <a href="relatorios.html" class="nav-item">📈 Relatórios & Analytics</a>
-    </nav>
-
-    <div class="user-area">
-        <div class="user">Usuário Master</div>
-        <button class="btn-sair" onclick="logout()">Sair</button>
-    </div>
+  </div>
+  <nav class="nav-links">
+    <a href="dashboard.html" class="nav-item active">📊 Dashboard</a>
+    <a href="nova-operacao.html" class="nav-item">＋ Nova Operação</a>
+    <a href="relatorios.html" class="nav-item">📈 Relatórios & Analytics</a>
+  </nav>
+  <div class="user-area">
+    <div class="user" id="userLabel">Carregando...</div>
+    <button class="btn-sair" onclick="logout()">Sair</button>
+  </div>
 </header>
 
 <div class="container">
 
-    <div class="welcome">
-        <h1>Bem‑vindo ao Dashboard</h1>
-        <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução de forma consolidada.</p>
+  <div class="welcome">
+    <h1>Bem‑vindo ao Dashboard</h1>
+    <p>Gerencie sua banca, acompanhe resultados e monitore sua evolução de forma consolidada.</p>
+  </div>
+
+  <!-- PAINEL ADMIN -->
+  <div id="painelAdmin" style="display:none;margin-bottom:30px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;color:white;letter-spacing:1px;">👑 MODO ADMINISTRADOR</span>
+    </div>
+    <div id="licencaAdminContainer"></div>
+  </div>
+
+  <!-- AVISO LICENÇA USUÁRIO -->
+  <div id="avisoLicenca" style="display:none;"></div>
+
+  <div class="cards">
+    <div class="card"><div class="card-title">Saldo Atual da Banca</div><div class="card-value green" id="saldoAtual">R$ 0,00</div></div>
+    <div class="card"><div class="card-title">Lucro / Prejuízo Líquido</div><div class="card-value green" id="lucroTotal">R$ 0,00</div></div>
+    <div class="card"><div class="card-title">Total de Operações</div><div class="card-value" id="totalOperacoes">0</div></div>
+    <div class="card"><div class="card-title">Assertividade Geral</div><div class="card-value" id="assertividade">0%</div></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-title">Green 1º Tiro</div><div class="card-value green" id="green1">0</div></div>
+    <div class="card"><div class="card-title">Green 2º Tiro</div><div class="card-value green" id="green2">0</div></div>
+    <div class="card"><div class="card-title">Green 3º Tiro</div><div class="card-value green" id="green3">0</div></div>
+    <div class="card"><div class="card-title">Reds Acumulados</div><div class="card-value red" id="reds">0</div></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="card-title">Resultado em Principal</div><div class="card-value" id="resultadoPrincipal">R$ 0,00</div></div>
+    <div class="card"><div class="card-title">Resultado em Opcionais</div><div class="card-value" id="resultadoOpcionais">R$ 0,00</div></div>
+    <div class="card"><div class="card-title">Resultado Consolidado</div><div class="card-value green" id="resultadoFinal">R$ 0,00</div></div>
+    <div class="card"><div class="card-title">ROI sobre Banca Base</div><div class="card-value" id="roi">0%</div></div>
+  </div>
+
+  <div class="main">
+    <div class="panel">
+      <h3>Gestão Financeira & Lançamentos</h3>
+      <div style="display:flex;gap:10px;margin-bottom:15px;">
+        <input type="number" id="inputBancaInicial" class="input-gestao" placeholder="Definir Banca Inicial (Ex: 1000)">
+        <button onclick="salvarBancaInicial()" style="padding:14px 20px;background:#3b82f6;color:white;border:none;border-radius:12px;cursor:pointer;font-weight:600;">Atualizar Banca</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:25px;">
+        <input type="number" id="valorMovimentacao" class="input-gestao" placeholder="Valor para Aporte ou Saque (R$)">
+        <button onclick="gerenciarBanca('aporte')" style="padding:14px 20px;background:#00e5a0;color:#020617;border:none;border-radius:12px;cursor:pointer;font-weight:700;">+ Aporte</button>
+        <button onclick="gerenciarBanca('saque')" style="padding:14px 20px;background:#ff4d6d;color:white;border:none;border-radius:12px;cursor:pointer;font-weight:700;">- Saque</button>
+      </div>
+      <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;line-height:1.5;border-top:1px solid rgba(255,255,255,0.05);padding-top:20px;">
+        Inicie a calculadora de cobertura para registrar sua nova operação com múltiplos tiros ou distribuição automática em mercados opcionais.
+      </p>
+      <button class="button" onclick="window.location.href='nova-operacao.html'">＋ Iniciar Nova Operação</button>
     </div>
 
-    <!-- PAINEL ADMIN: visível apenas para o administrador -->
-    <div id="painelAdmin" style="display:none;margin-bottom:30px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <span style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;color:white;letter-spacing:1px;">👑 MODO ADMINISTRADOR</span>
-        </div>
-        <div id="licencaAdminContainer"></div>
+    <div class="panel">
+      <h3>Últimos Resultados</h3>
+      <div class="history-container" id="historicoLista">
+        <p style="color:#94a3b8;font-size:13px;padding:15px 0;">Nenhuma operação registrada no sistema.</p>
+      </div>
+      <button class="button logout-panel" onclick="zerarDados()">Zerar Dados do Painel</button>
     </div>
-
-    <!-- AVISO DE LICENÇA: dias restantes para usuários comuns -->
-    <div id="avisoLicenca" style="display:none;"></div>
-
-    <div class="cards">
-        <div class="card">
-            <div class="card-title">Saldo Atual da Banca</div>
-            <div class="card-value green" id="saldoAtual">R$ 0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Lucro / Prejuízo Líquido</div>
-            <div class="card-value green" id="lucroTotal">R$ 0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Total de Operações</div>
-            <div class="card-value" id="totalOperacoes">0</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Assertividade Geral</div>
-            <div class="card-value" id="assertividade">0%</div>
-        </div>
-    </div>
-
-    <div class="cards">
-        <div class="card">
-            <div class="card-title">Green 1º Tiro</div>
-            <div class="card-value green" id="green1">0</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Green 2º Tiro</div>
-            <div class="card-value green" id="green2">0</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Green 3º Tiro</div>
-            <div class="card-value green" id="green3">0</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Reds Acumulados</div>
-            <div class="card-value red" id="reds">0</div>
-        </div>
-    </div>
-
-    <div class="cards">
-        <div class="card">
-            <div class="card-title">Resultado em Principal</div>
-            <div class="card-value" id="resultadoPrincipal">R$ 0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Resultado em Opcionais</div>
-            <div class="card-value" id="resultadoOpcionais">R$ 0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Resultado Consolidado</div>
-            <div class="card-value green" id="resultadoFinal">R$ 0,00</div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">ROI sobre Banca Base</div>
-            <div class="card-value" id="roi">0%</div>
-        </div>
-    </div>
-
-    <div class="main">
-
-        <div class="panel">
-            <h3>Gestão Financeira & Lançamentos</h3>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="number" id="inputBancaInicial" class="input-gestao" placeholder="Definir Banca Inicial (Ex: 1000)">
-                <button onclick="salvarBancaInicial()" style="padding:14px 20px; background:#3b82f6; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;">Atualizar Banca</button>
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                <input type="number" id="valorMovimentacao" class="input-gestao" placeholder="Valor para Aporte ou Saque (R$)">
-                <button onclick="gerenciarBanca('aporte')" style="padding:14px 20px; background:#00e5a0; color:#020617; border:none; border-radius:12px; cursor:pointer; font-weight:700;">+ Aporte</button>
-                <button onclick="gerenciarBanca('saque')" style="padding:14px 20px; background:#ff4d6d; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:700;">- Saque</button>
-            </div>
-
-            <p style="color:#94a3b8;margin-bottom:20px;font-size:14px;line-height:1.5; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                Inicie a calculadora de cobertura para registrar sua nova operação com múltiplos tiros ou distribuição automática em mercados opcionais.
-            </p>
-            <button class="button" onclick="window.location.href='nova-operacao.html'">＋ Iniciar Nova Operação</button>
-        </div>
-
-        <div class="panel">
-            <h3>Últimos Resultados</h3>
-            
-            <div class="history-container" id="historicoLista">
-                <p style="color:#94a3b8;font-size:13px;padding:15px 0;">Nenhuma operação registrada no sistema.</p>
-            </div>
-
-            <button class="button logout-panel" onclick="logout()">Zerar Dados do Painel</button>
-        </div>
-
-    </div>
+  </div>
 </div>
 
 <script>
-// ── CONTROLE DE LICENÇA ──────────────────────────────────────────
-(async function inicializarLicenca() {
-    // Garante que o módulo de licença está disponível
-    if (typeof window.CBI_LICENCA === 'undefined') return;
+// ================================================================
+//  SISTEMA DE LICENÇA — embutido
+// ================================================================
+const ADMIN_EMAIL = 'cbest07@gmail.com';
+const TRIAL_DIAS  = 7;
+const LS_KEY      = 'cbi_licencas';
+const LS_SESSAO   = 'cbi_email_sessao';
 
-    const emailSessao = localStorage.getItem('cbi_email_sessao');
+function lerLicencas(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch{ return {}; } }
+function salvarLicencas(o){ localStorage.setItem(LS_KEY, JSON.stringify(o)); }
 
-    if (!emailSessao) {
-        window.location.href = 'login.html';
-        return;
-    }
+function diasRestantes(exp){ return Math.ceil((new Date(exp)-new Date())/(1000*60*60*24)); }
+function dataExpiracaoPara(dias){ const d=new Date(); d.setDate(d.getDate()+dias); return d.toISOString(); }
+function formatarData(iso){ return new Date(iso).toLocaleDateString('pt-BR'); }
 
-    const ADMIN = window.CBI_LICENCA.ADMIN_EMAIL;
-
-    if (emailSessao === ADMIN) {
-        // Mostra painel admin
-        document.getElementById('painelAdmin').style.display = 'block';
-        window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
-    } else {
-        // Verifica licença do usuário comum
-        const lic = window.CBI_LICENCA.verificarLicenca(emailSessao);
-        if (!lic.ativa) {
-            window.CBI_LICENCA.protegerPagina && window.CBI_LICENCA.protegerPagina();
-            // fallback inline
-            document.body.innerHTML = '';
-            window.CBI_LICENCA.protegerPagina();
-            return;
-        }
-        // Mostra aviso de dias restantes
-        const aviso = document.getElementById('avisoLicenca');
-        if (aviso) {
-            const isTrial = lic.tipo === 'trial';
-            const urgente = lic.restam <= 2;
-            const cor = urgente ? '#ff4d6d' : (isTrial ? '#a78bfa' : '#00e5a0');
-            const bg  = urgente ? 'rgba(255,77,109,.08)' : (isTrial ? 'rgba(124,58,237,.08)' : 'rgba(0,229,160,.08)');
-            const bor = urgente ? 'rgba(255,77,109,.25)' : (isTrial ? 'rgba(124,58,237,.25)' : 'rgba(0,229,160,.25)');
-            const label = isTrial ? '🆓 Trial gratuito' : '✅ Licença ativa';
-            const msg = urgente && isTrial
-                ? `⚠ Seu trial encerra em <strong>${lic.restam} dia(s)</strong>. Contate o administrador para assinar o plano.`
-                : `${label} — <strong>${lic.restam} dia(s)</strong> restante(s)`;
-            aviso.style.display = 'block';
-            aviso.innerHTML = `
-                <div style="background:${bg};border:1px solid ${bor};border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-                    <span style="color:${cor};font-size:14px;font-weight:600;">${msg}</span>
-                    ${urgente ? `<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>` : ''}
-                </div>`;
-        }
-        }
-    }
-})();
-// ────────────────────────────────────────────────────────────────
-
-// NOVAS FUNÇÕES DE GESTÃO DE BANCA
-function salvarBancaInicial() {
-    let valor = document.getElementById('inputBancaInicial').value;
-    if(valor) {
-        localStorage.setItem('bancaInicial', valor);
-        location.reload();
-    } else {
-        alert('Por favor, informe um valor válido para a banca inicial.');
-    }
+function ativarTrial(email){
+  const lic=lerLicencas();
+  if(lic[email]) return;
+  lic[email]={ email, tipo:'trial', liberadoEm:new Date().toISOString(), expiracao:dataExpiracaoPara(TRIAL_DIAS) };
+  salvarLicencas(lic);
 }
 
-function gerenciarBanca(tipo) {
-    let valor = parseFloat(document.getElementById('valorMovimentacao').value);
-    if (isNaN(valor) || valor <= 0) {
-        return alert("Por favor, digite um valor válido maior que zero.");
-    }
-    
-    let operacoes = JSON.parse(localStorage.getItem('operacoes') || '[]');
-    
-    operacoes.push({
-        descricao: tipo === 'aporte' ? 'Aporte de Capital' : 'Saque de Capital',
-        resultadoFinal: tipo === 'aporte' ? valor : -valor,
-        resultadoPrincipal: 0,
-        resultadoOpcionais: 0,
-        tiro: tipo === 'aporte' ? 'Aporte' : 'Saque',
-        data: new Date().toISOString()
-    });
-    
-    localStorage.setItem('operacoes', JSON.stringify(operacoes));
-    document.getElementById('valorMovimentacao').value = '';
-    calcularEAtualizarDashboard();
+function liberarLicenca(email, dataFim){
+  const lic=lerLicencas();
+  lic[email]={ email, tipo:'ativa', liberadoEm:new Date().toISOString(), expiracao: dataFim ? new Date(dataFim).toISOString() : dataExpiracaoPara(30) };
+  salvarLicencas(lic);
 }
 
-// FUNÇÃO LOGOUT CORRIGIDA
-function logout() {
-    if(confirm('Tem certeza de que deseja sair? O sistema será encerrado e os dados locais serão apagados.')){
-        // 1. Limpa os dados do banco local
-        localStorage.clear();
+function revogarLicenca(email){ const lic=lerLicencas(); delete lic[email]; salvarLicencas(lic); }
 
-        // 2. Substitui a tela pela mensagem de encerramento
-        document.body.innerHTML = `
-            <div style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #020617; color: white; font-family: 'Inter', sans-serif;">
-                <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 10px;">Sistema Encerrado</h2>
-                <p style="color: #94a3b8; font-size: 16px;">Redirecionando para login em 2 segundos...</p>
+function verificarLicenca(email){
+  const lic=lerLicencas()[email];
+  if(!lic) return { ativa:false, motivo:'Sem licença cadastrada.', semLicenca:true };
+  const restam=diasRestantes(lic.expiracao);
+  if(restam<=0) return { ativa:false, motivo: lic.tipo==='trial' ? 'Seu período de teste gratuito encerrou.' : 'Sua licença expirou.', tipo:lic.tipo };
+  return { ativa:true, restam, tipo:lic.tipo, expiracao:lic.expiracao };
+}
+
+function mostrarBloqueio(email, motivo, tipo){
+  const isTrial = tipo==='trial';
+  document.body.innerHTML = `
+    <style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    body{background:#020617;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .glow{position:fixed;width:600px;height:600px;background:${isTrial?'#7c3aed':'#dc2626'};opacity:.08;filter:blur(160px);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);}
+    .card{background:rgba(15,23,42,.9);border:1px solid ${isTrial?'rgba(124,58,237,.25)':'rgba(220,38,38,.2)'};border-radius:28px;padding:40px;max-width:440px;width:100%;text-align:center;position:relative;z-index:2;}
+    .btn{padding:14px 28px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white;border:none;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;}</style>
+    <div class="glow"></div>
+    <div class="card">
+      <div style="font-size:52px;margin-bottom:20px;">${isTrial?'⏰':'🔒'}</div>
+      <h2 style="color:white;font-size:24px;font-weight:800;margin-bottom:10px;">${isTrial?'Período de Teste Encerrado':'Acesso Restrito'}</h2>
+      <div style="color:${isTrial?'#a78bfa':'#ef4444'};font-weight:600;font-size:13px;background:${isTrial?'rgba(124,58,237,.12)':'rgba(220,38,38,.1)'};padding:8px 16px;border-radius:10px;display:inline-block;margin:12px 0;">${email}</div>
+      <p style="color:${isTrial?'#c4b5fd':'#fca5a5'};font-size:13px;margin-bottom:8px;font-weight:600;">${motivo}</p>
+      <p style="color:#64748b;font-size:13px;margin-bottom:28px;line-height:1.6;">${isTrial?'Seu trial gratuito de 7 dias chegou ao fim. Entre em contato com o administrador para assinar o plano.':'Entre em contato com o administrador para reativar seu acesso.'}</p>
+      <button class="btn" onclick="localStorage.removeItem('${LS_SESSAO}');window.location.href='login.html'">Voltar ao Login</button>
+      <p style="margin-top:20px;color:#475569;font-size:12px;">CBI — Controle de Banca Inteligente</p>
+    </div>`;
+}
+
+function renderizarPainelAdmin(){
+  const container = document.getElementById('licencaAdminContainer');
+  if(!container) return;
+
+  function refresh(){
+    const licencas = lerLicencas();
+    const entradas = Object.values(licencas);
+    const hoje = new Date().toISOString().split('T')[0];
+    const padrao30 = new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0];
+
+    const linhas = entradas.map(l => {
+      const restam = diasRestantes(l.expiracao);
+      const exp = restam<=0;
+      const cor = exp?'#ff4d6d':restam<=3?'#f59e0b':'#00e5a0';
+      const stxt = exp?(l.tipo==='trial'?'Trial expirado':'Expirada'):`${restam} dia(s)`;
+      const badge = l.tipo==='trial'
+        ? `<span style="font-size:10px;background:rgba(124,58,237,.2);color:#a78bfa;padding:2px 8px;border-radius:6px;font-weight:700;margin-left:6px;">TRIAL</span>`
+        : `<span style="font-size:10px;background:rgba(0,229,160,.1);color:#00e5a0;padding:2px 8px;border-radius:6px;font-weight:700;margin-left:6px;">ATIVA</span>`;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="display:flex;align-items:center;color:white;font-size:13px;font-weight:600;">${l.email}${badge}</div>
+          <div style="color:#64748b;font-size:12px;margin-top:3px;">Expira: ${formatarData(l.expiracao)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="color:${cor};font-size:12px;font-weight:700;">${stxt}</span>
+          <button onclick="abrirModalRenovar('${l.email}')" style="padding:6px 12px;background:rgba(79,70,229,.2);border:1px solid rgba(79,70,229,.4);color:#818cf8;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;">Renovar</button>
+          <button onclick="revogarAdmin('${l.email}')" style="padding:6px 12px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#ef4444;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;">Revogar</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="background:#071226;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px;margin-bottom:16px;">
+        <h3 style="font-size:16px;font-weight:800;color:white;margin-bottom:6px;">🔑 Liberar Nova Licença</h3>
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:18px;">Digite o e-mail do usuário e escolha até quando a licença será válida.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input id="adminEmailInput" type="email" placeholder="email@usuario.com"
+            style="padding:13px 16px;background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;width:100%;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:160px;">
+              <label style="color:#64748b;font-size:12px;display:block;margin-bottom:6px;">Data de expiração</label>
+              <input id="adminDataFim" type="date" min="${hoje}" value="${padrao30}"
+                style="width:100%;padding:12px 14px;background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;color-scheme:dark;">
             </div>
-        `;
+            <button onclick="liberarAdmin()"
+              style="padding:13px 22px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">
+              ✓ Liberar Acesso
+            </button>
+          </div>
+        </div>
+        <div id="adminMsg" style="margin-top:12px;font-size:13px;display:none;padding:10px 14px;border-radius:10px;"></div>
+      </div>
 
-        // 3. Aguarda 2 segundos e redireciona
-        setTimeout(function() {
-            window.location.href = 'login.html'; 
-        }, 2000);
-    }
+      <!-- MODAL RENOVAR -->
+      <div id="modalRenovar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#0f172a;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;width:100%;max-width:380px;margin:20px;">
+          <h3 style="color:white;font-size:16px;font-weight:800;margin-bottom:6px;">Renovar Licença</h3>
+          <p id="modalLabel" style="color:#94a3b8;font-size:13px;margin-bottom:18px;"></p>
+          <label style="color:#64748b;font-size:12px;display:block;margin-bottom:6px;">Nova data de expiração</label>
+          <input id="modalDataFim" type="date" min="${hoje}" value="${padrao30}"
+            style="width:100%;padding:12px 14px;background:#020617;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-size:14px;color-scheme:dark;margin-bottom:16px;">
+          <div style="display:flex;gap:10px;">
+            <button onclick="fecharModal()" style="flex:1;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:12px;font-size:14px;cursor:pointer;font-weight:600;">Cancelar</button>
+            <button onclick="confirmarRenovar()" style="flex:1;padding:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:white;border-radius:12px;font-size:14px;cursor:pointer;font-weight:700;">Confirmar</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#071226;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px;">
+        <h3 style="font-size:16px;font-weight:800;color:white;margin-bottom:4px;">📋 Usuários no Sistema</h3>
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:18px;">Trials e licenças ativas.</p>
+        ${entradas.length===0?'<p style="color:#64748b;font-size:13px;padding:16px 0;">Nenhum usuário cadastrado ainda.</p>':linhas}
+      </div>`;
+  }
+
+  let _emailRenovar='';
+
+  window.liberarAdmin = function(){
+    const email=(document.getElementById('adminEmailInput').value||'').trim().toLowerCase();
+    const dataFim=document.getElementById('adminDataFim').value;
+    const msg=document.getElementById('adminMsg');
+    if(!email||!email.includes('@')){ msg.style.display='block';msg.style.background='rgba(220,38,38,.1)';msg.style.color='#fca5a5';msg.textContent='⚠ Digite um e-mail válido.';return; }
+    if(!dataFim){ msg.style.display='block';msg.style.background='rgba(220,38,38,.1)';msg.style.color='#fca5a5';msg.textContent='⚠ Selecione uma data de expiração.';return; }
+    liberarLicenca(email, dataFim);
+    document.getElementById('adminEmailInput').value='';
+    msg.style.display='block';msg.style.background='rgba(0,229,160,.08)';msg.style.color='#86efac';
+    msg.textContent='✓ Licença liberada para '+email+' até '+new Date(dataFim).toLocaleDateString('pt-BR');
+    setTimeout(()=>{ msg.style.display='none'; },5000);
+    refresh();
+  };
+
+  window.abrirModalRenovar = function(email){
+    _emailRenovar=email;
+    document.getElementById('modalLabel').textContent=email;
+    document.getElementById('modalRenovar').style.display='flex';
+  };
+  window.fecharModal = function(){ document.getElementById('modalRenovar').style.display='none'; };
+  window.confirmarRenovar = function(){
+    const data=document.getElementById('modalDataFim').value;
+    if(!data) return;
+    liberarLicenca(_emailRenovar, data);
+    fecharModal(); refresh();
+  };
+  window.revogarAdmin = function(email){
+    if(confirm('Revogar acesso de '+email+'?')){ revogarLicenca(email); refresh(); }
+  };
+
+  refresh();
 }
 
-// Execução segura e reativa baseada no LocalStorage compartilhado
-document.addEventListener('DOMContentLoaded', function() {
-    calcularEAtualizarDashboard();
-});
+// ================================================================
+//  INICIALIZAÇÃO: verifica sessão e licença
+// ================================================================
+(function init(){
+  const email = localStorage.getItem(LS_SESSAO);
 
-function calcularEAtualizarDashboard() {
-    try {
-        const operacoes = JSON.parse(localStorage.getItem('operacoes') || '[]');
-        let bancaSalva = localStorage.getItem('bancaInicial');
-        let BANCA_INICIAL = bancaSalva ? parseFloat(bancaSalva) : 0.00;
-        
-        if(document.getElementById('inputBancaInicial')) {
-            document.getElementById('inputBancaInicial').placeholder = "Banca Atual: R$ " + BANCA_INICIAL.toFixed(2);
-        }
+  if(!email){ window.location.href='login.html'; return; }
 
-        let lucroTotal = 0;
-        let green1 = 0;
-        let green2 = 0;
-        let green3 = 0;
-        let reds = 0;
-        let reembolsos = 0;
-        let resPrincipal = 0;
-        let resOpcionais = 0;
-        let operacoesValidasBet = 0;
-        
-        operacoes.forEach(function(op) {
-            lucroTotal += op.resultadoFinal || 0;
-            resPrincipal += op.resultadoPrincipal || 0;
-            resOpcionais += op.resultadoOpcionais || 0;
-            
-            if (op.tiro === 'Green 1º Tiro') { green1++; operacoesValidasBet++; }
-            else if (op.tiro === 'Green 2º Tiro') { green2++; operacoesValidasBet++; }
-            else if (op.tiro === 'Green 3º Tiro') { green3++; operacoesValidasBet++; }
-            else if (op.tiro === 'RED') { reds++; operacoesValidasBet++; }
-            else if (op.tiro === 'Reembolso') { reembolsos++; operacoesValidasBet++; }
-        });
-        
-        let totalGreens = green1 + green2 + green3;
-        let totalValidosParaAssertividade = operacoesValidasBet - reembolsos;
-        let assertividade = totalValidosParaAssertividade > 0 ? Math.round((totalGreens / totalValidosParaAssertividade) * 100) : 0;
-        
-        let saldoAtual = BANCA_INICIAL + lucroTotal;
-        let roi = BANCA_INICIAL > 0 ? Math.round((lucroTotal / BANCA_INICIAL) * 100) : 0;
-        
-        definirElementoValor('saldoAtual', saldoAtual, false);
-        definirElementoValor('lucroTotal', lucroTotal, true);
-        document.getElementById('totalOperacoes').textContent = operacoesValidasBet;
-        document.getElementById('assertividade').textContent = assertividade + '%';
-        
-        document.getElementById('green1').textContent = green1;
-        document.getElementById('green2').textContent = green2;
-        document.getElementById('green3').textContent = green3;
-        document.getElementById('reds').textContent = reds;
-        
-        definirElementoValor('resultadoPrincipal', resPrincipal, false);
-        definirElementoValor('resultadoOpcionais', resOpcionais, false);
-        definirElementoValor('resultadoFinal', lucroTotal, false);
-        
-        let elRoi = document.getElementById('roi');
-        elRoi.textContent = (roi >= 0 ? '+' : '') + roi + '%';
-        elRoi.className = 'card-value ' + (roi >= 0 ? 'green' : 'red');
+  document.getElementById('userLabel').textContent = email===ADMIN_EMAIL ? '👑 Administrador' : email.split('@')[0];
 
-        renderizarUltimosResultadosFeed(operacoes);
-        
-    } catch (e) {
-        console.error("Erro ao computar dados reais do dashboard:", e);
-    }
+  if(email===ADMIN_EMAIL){
+    document.getElementById('painelAdmin').style.display='block';
+    renderizarPainelAdmin();
+    return;
+  }
+
+  const lic = verificarLicenca(email);
+  if(!lic.ativa){ mostrarBloqueio(email, lic.motivo, lic.tipo); return; }
+
+  // Banner de licença
+  const aviso = document.getElementById('avisoLicenca');
+  const isTrial = lic.tipo==='trial';
+  const urgente = lic.restam<=2;
+  const cor  = urgente?'#ff4d6d':isTrial?'#a78bfa':'#00e5a0';
+  const bg   = urgente?'rgba(255,77,109,.08)':isTrial?'rgba(124,58,237,.08)':'rgba(0,229,160,.08)';
+  const bor  = urgente?'rgba(255,77,109,.25)':isTrial?'rgba(124,58,237,.25)':'rgba(0,229,160,.25)';
+  const label= isTrial?'🆓 Trial gratuito':'✅ Licença ativa';
+  const msgt = urgente&&isTrial
+    ? '⚠ Seu trial encerra em <strong>'+lic.restam+' dia(s)</strong>. Contate o administrador para assinar o plano.'
+    : label+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
+  aviso.style.display='block';
+  aviso.innerHTML='<div style="background:'+bg+';border:1px solid '+bor+';border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;"><span style="color:'+cor+';font-size:14px;font-weight:600;">'+msgt+'</span>'+(urgente?'<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>':'')+'</div>';
+})();
+
+// ================================================================
+//  GESTÃO DE BANCA
+// ================================================================
+function salvarBancaInicial(){
+  let valor=document.getElementById('inputBancaInicial').value;
+  if(valor){ localStorage.setItem('bancaInicial',valor); location.reload(); }
+  else alert('Por favor, informe um valor válido para a banca inicial.');
 }
 
-function definirElementoValor(id, valor, incluirSinal) {
-    let el = document.getElementById(id);
-    if (!el) return;
-    
-    let strMoeda = 'R$ ' + Math.abs(valor).toFixed(2).replace('.', ',');
-    let sinal = incluirSinal && valor > 0 ? '+' : (valor < 0 ? '-' : '');
-    
-    el.textContent = sinal + strMoeda;
-    if (valor > 0) el.className = 'card-value green';
-    else if (valor < 0) el.className = 'card-value red';
-    else el.className = 'card-value';
+function gerenciarBanca(tipo){
+  let valor=parseFloat(document.getElementById('valorMovimentacao').value);
+  if(isNaN(valor)||valor<=0) return alert('Por favor, digite um valor válido maior que zero.');
+  let operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
+  operacoes.push({ descricao:tipo==='aporte'?'Aporte de Capital':'Saque de Capital', resultadoFinal:tipo==='aporte'?valor:-valor, resultadoPrincipal:0, resultadoOpcionais:0, tiro:tipo==='aporte'?'Aporte':'Saque', data:new Date().toISOString() });
+  localStorage.setItem('operacoes',JSON.stringify(operacoes));
+  document.getElementById('valorMovimentacao').value='';
+  calcularEAtualizarDashboard();
 }
 
-function renderizarUltimosResultadosFeed(lista) {
-    let container = document.getElementById('historicoLista');
-    if (!container) return;
-    
-    let ultimas = [...lista].slice(-5).reverse();
-    
-    if (ultimas.length === 0) {
-        container.innerHTML = '<p style="color:#64748b;font-size:13px;padding:15px 0;font-family:monospace;">Nenhuma entrada gravada.</p>';
-        return;
-    }
-    
-    let html = '';
-    ultimas.forEach(function(op) {
-        let corClasse = op.resultadoFinal >= 0 ? 'green' : 'red';
-        let sinal = op.resultadoFinal > 0 ? '+' : '';
-        let textoMoeda = 'R$ ' + Math.abs(op.resultadoFinal).toFixed(2).replace('.', ',');
-        let descricaoExibida = op.descricao ? op.descricao : op.tiro;
-        
-        html += '<div class="history-item">' +
-                    '<span>' + descricaoExibida + '</span>' +
-                    '<span class="' + corClasse + '">' + sinal + textoMoeda + '</span>' +
-                '</div>';
+function zerarDados(){
+  if(confirm('Tem certeza que deseja zerar todos os dados do painel? Esta ação não pode ser desfeita.')){
+    localStorage.removeItem('operacoes'); localStorage.removeItem('bancaInicial'); location.reload();
+  }
+}
+
+function logout(){
+  if(confirm('Tem certeza de que deseja sair?')){
+    const lic=localStorage.getItem(LS_KEY);
+    localStorage.clear();
+    if(lic) localStorage.setItem(LS_KEY,lic); // mantém licenças ao sair
+    document.body.innerHTML='<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#020617;color:white;font-family:Inter,sans-serif;"><h2 style="font-size:32px;font-weight:800;margin-bottom:10px;">Sistema Encerrado</h2><p style="color:#94a3b8;font-size:16px;">Redirecionando para login em 2 segundos...</p></div>';
+    setTimeout(()=>{ window.location.href='login.html'; },2000);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', calcularEAtualizarDashboard);
+
+function calcularEAtualizarDashboard(){
+  try{
+    const operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
+    let BANCA_INICIAL=parseFloat(localStorage.getItem('bancaInicial')||'0');
+    if(document.getElementById('inputBancaInicial')) document.getElementById('inputBancaInicial').placeholder='Banca Atual: R$ '+BANCA_INICIAL.toFixed(2);
+    let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
+    operacoes.forEach(op=>{
+      lucroTotal+=op.resultadoFinal||0; resPrincipal+=op.resultadoPrincipal||0; resOpcionais+=op.resultadoOpcionais||0;
+      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;}
     });
-    container.innerHTML = html;
+    let totalGreens=green1+green2+green3, validos=opValidas-reembolsos;
+    let assertividade=validos>0?Math.round((totalGreens/validos)*100):0;
+    let saldoAtual=BANCA_INICIAL+lucroTotal, roi=BANCA_INICIAL>0?Math.round((lucroTotal/BANCA_INICIAL)*100):0;
+    setVal('saldoAtual',saldoAtual,false); setVal('lucroTotal',lucroTotal,true);
+    document.getElementById('totalOperacoes').textContent=opValidas;
+    document.getElementById('assertividade').textContent=assertividade+'%';
+    document.getElementById('green1').textContent=green1; document.getElementById('green2').textContent=green2;
+    document.getElementById('green3').textContent=green3; document.getElementById('reds').textContent=reds;
+    setVal('resultadoPrincipal',resPrincipal,false); setVal('resultadoOpcionais',resOpcionais,false); setVal('resultadoFinal',lucroTotal,false);
+    let elRoi=document.getElementById('roi'); elRoi.textContent=(roi>=0?'+':'')+roi+'%'; elRoi.className='card-value '+(roi>=0?'green':'red');
+    renderFeed(operacoes);
+  }catch(e){ console.error(e); }
+}
+
+function setVal(id,valor,sinal){
+  let el=document.getElementById(id); if(!el) return;
+  let s=sinal&&valor>0?'+':(valor<0?'-':'');
+  el.textContent=s+'R$ '+Math.abs(valor).toFixed(2).replace('.',',');
+  el.className='card-value '+(valor>0?'green':valor<0?'red':'');
+}
+
+function renderFeed(lista){
+  let c=document.getElementById('historicoLista'); if(!c) return;
+  let ult=[...lista].slice(-5).reverse();
+  if(ult.length===0){ c.innerHTML='<p style="color:#64748b;font-size:13px;padding:15px 0;">Nenhuma entrada gravada.</p>'; return; }
+  c.innerHTML=ult.map(op=>{
+    let cor=op.resultadoFinal>=0?'green':'red', s=op.resultadoFinal>0?'+':'';
+    return '<div class="history-item"><span>'+(op.descricao||op.tiro)+'</span><span class="'+cor+'">'+s+'R$ '+Math.abs(op.resultadoFinal).toFixed(2).replace('.',',')+'</span></div>';
+  }).join('');
 }
 </script>
-
 </body>
 </html>
