@@ -11,8 +11,8 @@ const SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // ----------------------------------------------------------------
 // Helpers internos
 // ----------------------------------------------------------------
-function diasRestantes(dataExpiracao) {
-  const diff = new Date(dataExpiracao) - new Date();
+function diasRestantes(expiracao) {
+  const diff = new Date(expiracao) - new Date();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
@@ -51,7 +51,7 @@ async function verificarLicenca(email) {
   try {
     const rows = await supaFetch(
       'licencas?email=eq.' + encodeURIComponent(email.trim().toLowerCase()) +
-      '&order=data_expiracao.desc&limit=1&select=*'
+      '&order=expiracao.desc&limit=1&select=*'
     );
 
     if (!rows || rows.length === 0) {
@@ -59,7 +59,7 @@ async function verificarLicenca(email) {
     }
 
     const lic = rows[0];
-    const restam = diasRestantes(lic.data_expiracao);
+    const restam = diasRestantes(lic.expiracao);
 
     if (restam <= 0) {
       const tipo = lic.tipo || 'trial';
@@ -72,7 +72,7 @@ async function verificarLicenca(email) {
       };
     }
 
-    return { ativa: true, tipo: lic.tipo || 'trial', restam, expira: lic.data_expiracao };
+    return { ativa: true, tipo: lic.tipo || 'trial', restam, expira: lic.expiracao };
 
   } catch (e) {
     console.error('Erro ao verificar licença:', e);
@@ -86,22 +86,20 @@ async function verificarLicenca(email) {
 async function liberarLicenca(email, dataFim, tipo = 'trial') {
   const emailNorm = email.trim().toLowerCase();
 
-  // Verifica se já existe
   const existentes = await supaFetch('licencas?email=eq.' + encodeURIComponent(emailNorm) + '&select=id');
 
   if (existentes && existentes.length > 0) {
     await supaFetch('licencas?email=eq.' + encodeURIComponent(emailNorm), 'PATCH', {
-      data_expiracao: dataFim,
+      expiracao: dataFim,
       tipo: tipo,
-      updated_at: new Date().toISOString()
+      liberado_em: new Date().toISOString()
     });
   } else {
     await supaFetch('licencas', 'POST', {
       email: emailNorm,
-      data_expiracao: dataFim,
+      expiracao: dataFim,
       tipo: tipo,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      liberado_em: new Date().toISOString()
     });
   }
 }
@@ -150,7 +148,6 @@ async function renderizarPainelAdmin(containerId) {
         </button>
       </div>
 
-      <!-- Formulário rápido inline -->
       <div id="formNovaLicenca" style="display:none;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px;margin-bottom:18px;">
         <p style="color:#94a3b8;font-size:13px;font-weight:600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;">Nova Licença / Renovação</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
@@ -176,7 +173,6 @@ async function renderizarPainelAdmin(containerId) {
         <div id="adminMsg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:13px;"></div>
       </div>
 
-      <!-- Lista de licenças -->
       <div id="listaLicencas">
         <p style="color:#64748b;font-size:13px;">Carregando licenças...</p>
       </div>
@@ -190,7 +186,7 @@ async function _carregarLicencas() {
   if (!lista) return;
 
   try {
-    const rows = await supaFetch('licencas?order=updated_at.desc&select=*');
+    const rows = await supaFetch('licencas?order=liberado_em.desc&select=*');
 
     if (!rows || rows.length === 0) {
       lista.innerHTML = '<p style="color:#64748b;font-size:13px;padding:10px 0;">Nenhuma licença cadastrada ainda.</p>';
@@ -198,13 +194,13 @@ async function _carregarLicencas() {
     }
 
     const linhas = rows.map(lic => {
-      const restam = diasRestantes(lic.data_expiracao);
+      const restam = diasRestantes(lic.expiracao);
       const ativa  = restam > 0;
       const corStatus = ativa ? (restam <= 3 ? '#f59e0b' : '#00e5a0') : '#ff4d6d';
       const bgStatus  = ativa ? (restam <= 3 ? 'rgba(245,158,11,.1)' : 'rgba(0,229,160,.1)') : 'rgba(255,77,109,.1)';
       const labelStatus = ativa ? (restam <= 3 ? `⚠ ${restam}d restantes` : `✓ ${restam}d restantes`) : '✗ Expirada';
-      const labelTipo = { trial: 'Trial', mensal: 'Mensal', trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual' }[lic.tipo] || lic.tipo;
-      const dataExp = new Date(lic.data_expiracao).toLocaleDateString('pt-BR');
+      const labelTipo = { trial: 'Trial', mensal: 'Mensal', trimestral: 'Trimestral', semestral: 'Semestral', anual: 'Anual', admin: 'Admin' }[lic.tipo] || lic.tipo;
+      const dataExp = new Date(lic.expiracao).toLocaleDateString('pt-BR');
 
       return `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);">
         <div style="flex:1;min-width:160px;">
@@ -213,7 +209,7 @@ async function _carregarLicencas() {
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span style="background:${bgStatus};color:${corStatus};padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;">${labelStatus}</span>
-          <button onclick="window.CBI_LICENCA._renovarRapido('${lic.email}', '${lic.tipo || 'trial'}')"
+          <button onclick="window.CBI_LICENCA._renovarRapido('${lic.email}', '${lic.tipo || 'mensal'}')"
             style="padding:6px 12px;background:rgba(79,70,229,.15);color:#818cf8;border:1px solid rgba(79,70,229,.3);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;">
             Renovar
           </button>
@@ -225,9 +221,8 @@ async function _carregarLicencas() {
       </div>`;
     }).join('');
 
-    // Stats resumidas no topo
-    const total = rows.length;
-    const ativas = rows.filter(r => diasRestantes(r.data_expiracao) > 0).length;
+    const total     = rows.length;
+    const ativas    = rows.filter(r => diasRestantes(r.expiracao) > 0).length;
     const expiradas = total - ativas;
 
     lista.innerHTML = `
@@ -277,7 +272,7 @@ async function _confirmarLicenca() {
   }
 
   const diasMap = { trial: 7, mensal: 30, trimestral: 90, semestral: 180, anual: 365 };
-  const dias = diasMap[tipo] || 7;
+  const dias    = diasMap[tipo] || 7;
   const dataFim = dataExpiracaoPara(dias);
 
   msgEl.style.display = 'block';
@@ -317,10 +312,9 @@ async function _renovarRapido(email, tipo) {
 async function _revogarLicenca(email) {
   if (!confirm(`Revogar acesso de ${email}? O usuário perderá o acesso imediatamente.`)) return;
   try {
-    // Seta data no passado para revogar
     await supaFetch('licencas?email=eq.' + encodeURIComponent(email), 'PATCH', {
-      data_expiracao: new Date('2000-01-01').toISOString(),
-      updated_at: new Date().toISOString()
+      expiracao: new Date('2000-01-01').toISOString(),
+      liberado_em: new Date().toISOString()
     });
     await _carregarLicencas();
   } catch (e) {
