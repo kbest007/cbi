@@ -144,61 +144,56 @@ body{ background:#020617; color:white; min-height:100vh; }
 <script src="licenca.js"></script>
 <script>
 // ================================================================
-//  INICIALIZAÇÃO: verifica sessão e licença (via licenca.js / Supabase)
+//  INICIALIZAÇÃO
 // ================================================================
 (async function init(){
   const email = localStorage.getItem('cbi_email_sessao');
   if(!email){ window.location.href='login.html'; return; }
 
-  // Aguarda licenca.js carregar (pode ser assíncrono)
-  let tentativas = 0;
-  while(typeof window.CBI_LICENCA === 'undefined' && tentativas < 20) {
-    await new Promise(r => setTimeout(r, 100));
-    tentativas++;
-  }
-
-  if(typeof window.CBI_LICENCA === 'undefined'){
-    document.getElementById('userLabel').textContent = email.split('@')[0];
-    calcularEAtualizarDashboard();
-    return;
-  }
-
-  const ADMIN_EMAIL = (window.CBI_LICENCA.ADMIN_EMAIL || '').trim().toLowerCase();
+  const ADMIN_EMAIL = 'cbest07@gmail.com';
   const emailNorm   = (email || '').trim().toLowerCase();
-  const isAdmin     = emailNorm === ADMIN_EMAIL;
+  const isAdmin     = emailNorm === ADMIN_EMAIL.trim().toLowerCase();
 
-  document.getElementById('userLabel').textContent = isAdmin ? '👑 Administrador' : email.split('@')[0];
+  // Aguarda licenca.js e supabase.js carregarem
+  let t = 0;
+  while((typeof window.CBI_LICENCA === 'undefined' || typeof window.CBI_DB === 'undefined') && t < 30) {
+    await new Promise(r => setTimeout(r, 100)); t++;
+  }
+
+  document.getElementById('userLabel').textContent = isAdmin ? '👑 Administrador' : emailNorm.split('@')[0];
 
   if(isAdmin){
-    document.getElementById('painelAdmin').style.display='block';
-    await window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
+    document.getElementById('painelAdmin').style.display = 'block';
+    if(typeof window.CBI_LICENCA !== 'undefined'){
+      await window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
+    }
     await calcularEAtualizarDashboard();
     return;
   }
 
-  const lic = await window.CBI_LICENCA.verificarLicenca(emailNorm);
-  if(!lic.ativa){
-    window.CBI_LICENCA.mostrarTelaAcessoBloqueado
-      ? window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo)
-      : (document.body.innerHTML='<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:white;font-family:Inter,sans-serif;"><p>'+lic.motivo+'</p></div>');
-    return;
+  // Usuário normal — verifica licença
+  if(typeof window.CBI_LICENCA !== 'undefined'){
+    const lic = await window.CBI_LICENCA.verificarLicenca(emailNorm);
+    if(!lic.ativa){
+      window.CBI_LICENCA.mostrarTelaAcessoBloqueado
+        ? window.CBI_LICENCA.mostrarTelaAcessoBloqueado(emailNorm, lic.motivo, lic.tipo)
+        : (document.body.innerHTML='<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:white;font-family:Inter,sans-serif;"><p>'+lic.motivo+'</p></div>');
+      return;
+    }
+    const aviso = document.getElementById('avisoLicenca');
+    const isTrial = lic.tipo==='trial';
+    const urgente = lic.restam<=2;
+    const cor = urgente?'#ff4d6d':isTrial?'#a78bfa':'#00e5a0';
+    const bg  = urgente?'rgba(255,77,109,.08)':isTrial?'rgba(124,58,237,.08)':'rgba(0,229,160,.08)';
+    const bor = urgente?'rgba(255,77,109,.25)':isTrial?'rgba(124,58,237,.25)':'rgba(0,229,160,.25)';
+    const label = isTrial?'🆓 Trial':'✅ Licença ativa';
+    const msgt = urgente&&isTrial
+      ? '⚠ Trial encerra em <strong>'+lic.restam+' dia(s)</strong>. Contate o administrador.'
+      : label+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
+    aviso.style.display='block';
+    aviso.innerHTML='<div style="background:'+bg+';border:1px solid '+bor+';border-radius:14px;padding:14px 20px;margin-bottom:24px;"><span style="color:'+cor+';font-size:14px;font-weight:600;">'+msgt+'</span></div>';
   }
 
-  // Banner de licença
-  const aviso = document.getElementById('avisoLicenca');
-  const isTrial = lic.tipo==='trial';
-  const urgente = lic.restam<=2;
-  const cor  = urgente?'#ff4d6d':isTrial?'#a78bfa':'#00e5a0';
-  const bg   = urgente?'rgba(255,77,109,.08)':isTrial?'rgba(124,58,237,.08)':'rgba(0,229,160,.08)';
-  const bor  = urgente?'rgba(255,77,109,.25)':isTrial?'rgba(124,58,237,.25)':'rgba(0,229,160,.25)';
-  const label= isTrial?'🆓 Trial gratuito':'✅ Licença ativa';
-  const msgt = urgente&&isTrial
-    ? '⚠ Seu trial encerra em <strong>'+lic.restam+' dia(s)</strong>. Contate o administrador para assinar o plano.'
-    : label+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
-  aviso.style.display='block';
-  aviso.innerHTML='<div style="background:'+bg+';border:1px solid '+bor+';border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;"><span style="color:'+cor+';font-size:14px;font-weight:600;">'+msgt+'</span>'+(urgente?'<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>':'')+'</div>';
-
-  // Carrega dados do dashboard para usuários normais também
   await calcularEAtualizarDashboard();
 })();
 
