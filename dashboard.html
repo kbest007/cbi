@@ -148,16 +148,28 @@ body{ background:#020617; color:white; min-height:100vh; }
 // ================================================================
 (async function init(){
   const email = localStorage.getItem('cbi_email_sessao');
-
   if(!email){ window.location.href='login.html'; return; }
 
-  const ADMIN_EMAIL = window.CBI_LICENCA.ADMIN_EMAIL;
+  // Aguarda licenca.js carregar (pode ser assíncrono)
+  let tentativas = 0;
+  while(typeof window.CBI_LICENCA === 'undefined' && tentativas < 20) {
+    await new Promise(r => setTimeout(r, 100));
+    tentativas++;
+  }
 
+  if(typeof window.CBI_LICENCA === 'undefined'){
+    document.getElementById('userLabel').textContent = email.split('@')[0];
+    calcularEAtualizarDashboard();
+    return;
+  }
+
+  const ADMIN_EMAIL = window.CBI_LICENCA.ADMIN_EMAIL;
   document.getElementById('userLabel').textContent = email===ADMIN_EMAIL ? '👑 Administrador' : email.split('@')[0];
 
   if(email===ADMIN_EMAIL){
     document.getElementById('painelAdmin').style.display='block';
     window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
+    calcularEAtualizarDashboard();
     return;
   }
 

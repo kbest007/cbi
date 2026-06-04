@@ -196,13 +196,30 @@ function renderGraficos(lista) {
 }
 
 function filtrarPorData() {
-    let inicio = new Date(document.getElementById('dataInicio').value).getTime();
-    let fim = new Date(document.getElementById('dataFim').value).setHours(23,59,59);
-    
-    let filtrados = dadosOriginais.filter(op => {
-        let d = new Date(op.data).getTime();
+    const inicioVal = document.getElementById('dataInicio').value;
+    const fimVal    = document.getElementById('dataFim').value;
+
+    // Se nenhuma data preenchida, mostra tudo
+    if (!inicioVal && !fimVal) { renderizar(dadosOriginais); return; }
+
+    const inicio = inicioVal ? new Date(inicioVal).getTime() : 0;
+    const fim    = fimVal    ? new Date(fimVal).setHours(23,59,59,999) : Infinity;
+
+    if (isNaN(inicio) || isNaN(fim)) { renderizar(dadosOriginais); return; }
+
+    const filtrados = dadosOriginais.filter(op => {
+        const d = new Date(op.data).getTime();
         return d >= inicio && d <= fim;
     });
+
+    if (filtrados.length === 0) {
+        document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">Nenhuma operação encontrada no período selecionado.</td></tr>';
+        document.getElementById('kpiLucro').textContent = '+R$ 0,00';
+        document.getElementById('kpiWinRate').textContent = '0%';
+        document.getElementById('kpiTotal').textContent = '0';
+        return;
+    }
+
     renderizar(filtrados);
 }
 
