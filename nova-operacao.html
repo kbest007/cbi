@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="supabase.js"></script>
 <script src="licenca.js"></script>
 <title>Nova Operação — Controle de Banca</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -419,23 +420,36 @@ function atualizar() {
   }
 }
 
-function salvarOperacao() {
+async function salvarOperacao() {
   var tiro  = document.querySelector('input[name="tiro"]:checked');
   var total = resPrincipal + resOpcionais;
-  var payload = {
-    id: Date.now().toString(),
-    data: new Date().toISOString(),
-    tiro: tiro ? tiro.value : 'Não informado',
-    descricao: document.getElementById('descPrincipal').value || '',
-    resultadoPrincipal: resPrincipal,
-    resultadoOpcionais: resOpcionais,
-    resultadoFinal: total,
-    historico: historico_log
+
+  // Pega usuário logado via Supabase token real
+  var user = window.CBI_DB.getSessionUser();
+  if (!user || !user.id) {
+    toast('Sessão expirada. Faça login novamente.', 'red');
+    setTimeout(function() { window.location.href = 'login.html'; }, 2000);
+    return;
+  }
+
+  var dados = {
+    tipo: tiro ? tiro.value : 'Não informado',
+    valor: total,
+    mercado: document.getElementById('descPrincipal').value || null,
+    resultado_principal: resPrincipal,
+    resultado_opcionais: resOpcionais,
+    descricao: document.getElementById('descPrincipal').value || null,
   };
-  var lista = JSON.parse(localStorage.getItem('operacoes') || '[]');
-  lista.push(payload);
-  localStorage.setItem('operacoes', JSON.stringify(lista));
-  toast('✅ Operação salva!');
+
+  try {
+    await window.CBI_DB.inserirOperacao(user.id, dados);
+    toast('✅ Operação salva no banco!');
+    // Limpa campos após salvar
+    setTimeout(function() { if(confirm('Operação salva! Deseja registrar uma nova operação?')) location.reload(); }, 500);
+  } catch (err) {
+    toast('Erro ao salvar: ' + err.message, 'red');
+    console.error('Erro Supabase:', err);
+  }
 }
 
 function confirmarLimpar() { if (confirm('Limpar todos os dados?')) location.reload(); }

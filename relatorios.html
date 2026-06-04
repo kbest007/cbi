@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="supabase.js"></script>
 <script src="licenca.js"></script>
 <title>Relatórios — Controle de Banca</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -96,7 +97,28 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-family: var(--m
 })();
 // ─────────────────────────────────────────────────────────────────
 
-let dadosOriginais = JSON.parse(localStorage.getItem('operacoes') || '[]');
+let dadosOriginais = [];
+
+// Carrega operações do Supabase ao iniciar
+(async function carregarOperacoes() {
+    const user = window.CBI_DB.getSessionUser();
+    if (!user || !user.id) return;
+    try {
+        const rows = await window.CBI_DB.getOperacoes(user.id);
+        dadosOriginais = rows.map(r => ({
+            id: r.id,
+            data: r.created_at,
+            descricao: r.descricao || r.mercado || r.tipo,
+            tiro: r.tipo,
+            resultadoFinal: Number(r.valor) || 0,
+            resultadoPrincipal: Number(r.resultado_principal) || 0,
+            resultadoOpcionais: Number(r.resultado_opcionais) || 0,
+        }));
+        renderizar(dadosOriginais);
+    } catch(err) {
+        console.error('Erro ao carregar operações:', err);
+    }
+})();
 
 function renderizar(lista) {
     const corpo = document.getElementById('corpoTabela');
@@ -105,10 +127,10 @@ function renderizar(lista) {
     
     lista.forEach(op => {
         corpo.innerHTML += `<tr>
-            <td>${new Date(op.data).toLocaleDateString()}</td>
-            <td>${op.descricao}</td>
+            <td>${new Date(op.data).toLocaleDateString('pt-BR')}</td>
+            <td>${op.descricao || ''}</td>
             <td>${op.tiro}</td>
-            <td style="color:${op.resultadoFinal >= 0 ? 'var(--green)' : 'var(--red)'}">${op.resultadoFinal.toFixed(2)}</td>
+            <td style="color:${op.resultadoFinal >= 0 ? 'var(--green)' : 'var(--red)'}">${Number(op.resultadoFinal).toFixed(2)}</td>
             <td><button class="btn-red" style="padding:5px 10px" onclick="deletar('${op.id}')">Excluir</button></td>
         </tr>`;
     });
@@ -136,17 +158,31 @@ function limparFiltros() {
     renderizar(dadosOriginais);
 }
 
-function deletar(id) {
-    dadosOriginais = dadosOriginais.filter(o => o.id !== id);
-    localStorage.setItem('operacoes', JSON.stringify(dadosOriginais));
-    renderizar(dadosOriginais);
+async function deletar(id) {
+    if (!confirm('Excluir esta operação?')) return;
+    try {
+        const token = window.CBI_DB.getAuthToken() || '';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg';
+        await fetch('https://tjzcgfjdhunqfifxgyyy.supabase.co/rest/v1/operacoes?id=eq.' + id, {
+            method: 'DELETE',
+            headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
+        });
+        dadosOriginais = dadosOriginais.filter(o => String(o.id) !== String(id));
+        renderizar(dadosOriginais);
+    } catch(err) {
+        alert('Erro ao excluir: ' + err.message);
+    }
 }
 
-function limparTudo() {
-    if(confirm("Apagar tudo?")) { localStorage.removeItem('operacoes'); location.reload(); }
+async function limparTudo() {
+    if(confirm("Apagar todas as operações? Isso não pode ser desfeito.")) {
+        const user = window.CBI_DB.getSessionUser();
+        if (user && user.id) {
+            try { await window.CBI_DB.deletarOperacoes(user.id); } catch(e) { console.error(e); }
+        }
+        location.reload();
+    }
 }
-
-renderizar(dadosOriginais);
 </script>
 </body>
 </html>

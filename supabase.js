@@ -4,12 +4,52 @@
 const SUPA_URL = 'https://tjzcgfjdhunqfifxgyyy.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg';
 
+// ── PEGA O TOKEN REAL DO USUÁRIO LOGADO ─────────────────────
+function getAuthToken() {
+  try {
+    // Supabase v2 salva com essa chave exata
+    const sbKey = 'sb-tjzcgfjdhunqfifxgyyy-auth-token';
+    const raw = localStorage.getItem(sbKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return parsed.access_token || null;
+    }
+    // Fallback: procura qualquer chave sb- com auth-token
+    for (let k of Object.keys(localStorage)) {
+      if (k.startsWith('sb-') && k.includes('auth-token')) {
+        const parsed = JSON.parse(localStorage.getItem(k));
+        if (parsed && parsed.access_token) return parsed.access_token;
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+function getSessionUser() {
+  try {
+    const sbKey = 'sb-tjzcgfjdhunqfifxgyyy-auth-token';
+    const raw = localStorage.getItem(sbKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return parsed.user || null;
+    }
+    for (let k of Object.keys(localStorage)) {
+      if (k.startsWith('sb-') && k.includes('auth-token')) {
+        const parsed = JSON.parse(localStorage.getItem(k));
+        if (parsed && parsed.user) return parsed.user;
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
 async function supaFetch(path, method = 'GET', body = null) {
+  const token = getAuthToken() || SUPA_KEY;
   const opts = {
     method,
     headers: {
       'apikey': SUPA_KEY,
-      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     }
@@ -61,9 +101,15 @@ async function deletarOperacoes(userId) {
 
 // ── SESSÃO ──────────────────────────────────────────────────
 async function getSession() {
+  // Primeiro tenta via localStorage (mais rápido e não precisa de request)
+  const user = getSessionUser();
+  if (user) return user;
+  // Fallback: tenta via API com token real
   try {
+    const token = getAuthToken();
+    if (!token) return null;
     const res = await fetch(SUPA_URL + '/auth/v1/user', {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + token }
     });
     if (!res.ok) return null;
     return await res.json();
@@ -71,4 +117,4 @@ async function getSession() {
 }
 
 // Namespace para ser acessível globalmente
-window.CBI_DB = { getPerfil, salvarPerfil, getOperacoes, inserirOperacao, deletarOperacoes, getSession, supaFetch };
+window.CBI_DB = { getPerfil, salvarPerfil, getOperacoes, inserirOperacao, deletarOperacoes, getSession, supaFetch, getAuthToken, getSessionUser };

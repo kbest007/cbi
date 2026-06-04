@@ -140,6 +140,7 @@ body{ background:#020617; color:white; min-height:100vh; }
   </div>
 </div>
 
+<script src="supabase.js"></script>
 <script src="licenca.js"></script>
 <script>
 // ================================================================
@@ -192,18 +193,34 @@ function salvarBancaInicial(){
   else alert('Por favor, informe um valor válido para a banca inicial.');
 }
 
-function gerenciarBanca(tipo){
+async function gerenciarBanca(tipo){
   let valor=parseFloat(document.getElementById('valorMovimentacao').value);
   if(isNaN(valor)||valor<=0) return alert('Por favor, digite um valor válido maior que zero.');
-  let operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
-  operacoes.push({ descricao:tipo==='aporte'?'Aporte de Capital':'Saque de Capital', resultadoFinal:tipo==='aporte'?valor:-valor, resultadoPrincipal:0, resultadoOpcionais:0, tiro:tipo==='aporte'?'Aporte':'Saque', data:new Date().toISOString() });
-  localStorage.setItem('operacoes',JSON.stringify(operacoes));
-  document.getElementById('valorMovimentacao').value='';
-  calcularEAtualizarDashboard();
+  const user = window.CBI_DB.getSessionUser();
+  if (!user || !user.id) return alert('Sessão expirada. Faça login novamente.');
+  try {
+    await window.CBI_DB.inserirOperacao(user.id, {
+      tipo: tipo==='aporte' ? 'Aporte' : 'Saque',
+      valor: tipo==='aporte' ? valor : -valor,
+      resultado_principal: 0,
+      resultado_opcionais: 0,
+      descricao: tipo==='aporte' ? 'Aporte de Capital' : 'Saque de Capital',
+      mercado: null
+    });
+    document.getElementById('valorMovimentacao').value='';
+    calcularEAtualizarDashboard();
+  } catch(err) {
+    alert('Erro ao registrar: ' + err.message);
+    console.error(err);
+  }
 }
 
-function zerarDados(){
+async function zerarDados(){
   if(confirm('Tem certeza que deseja zerar todos os dados do painel? Esta ação não pode ser desfeita.')){
+    const user = window.CBI_DB.getSessionUser();
+    if (user && user.id) {
+      try { await window.CBI_DB.deletarOperacoes(user.id); } catch(e) { console.error(e); }
+    }
     localStorage.removeItem('operacoes'); localStorage.removeItem('bancaInicial'); location.reload();
   }
 }
@@ -226,15 +243,34 @@ async function logout(){
 
 document.addEventListener('DOMContentLoaded', calcularEAtualizarDashboard);
 
-function calcularEAtualizarDashboard(){
+async function calcularEAtualizarDashboard(){
   try{
-    const operacoes=JSON.parse(localStorage.getItem('operacoes')||'[]');
-    let BANCA_INICIAL=parseFloat(localStorage.getItem('bancaInicial')||'0');
+    // Busca operações do Supabase
+    let operacoes = [];
+    const user = window.CBI_DB.getSessionUser();
+    if (user && user.id) {
+      try {
+        const rows = await window.CBI_DB.getOperacoes(user.id);
+        // Mapeia campos do banco para o formato do dashboard
+        operacoes = rows.map(r => ({
+          tiro: r.tipo,
+          resultadoFinal: Number(r.valor) || 0,
+          resultadoPrincipal: Number(r.resultado_principal) || 0,
+          resultadoOpcionais: Number(r.resultado_opcionais) || 0,
+          descricao: r.descricao || r.mercado || r.tipo,
+          data: r.created_at
+        }));
+      } catch(err) {
+        console.error('Erro ao buscar operações do Supabase:', err);
+      }
+    }
+
+    let BANCA_INICIAL = parseFloat(localStorage.getItem('bancaInicial')||'0');
     if(document.getElementById('inputBancaInicial')) document.getElementById('inputBancaInicial').placeholder='Banca Atual: R$ '+BANCA_INICIAL.toFixed(2);
     let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
     operacoes.forEach(op=>{
       lucroTotal+=op.resultadoFinal||0; resPrincipal+=op.resultadoPrincipal||0; resOpcionais+=op.resultadoOpcionais||0;
-      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;}
+      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;} else if(op.tiro==='Aporte'||op.tiro==='Saque'){/* ignora na contagem */}
     });
     let totalGreens=green1+green2+green3, validos=opValidas-reembolsos;
     let assertividade=validos>0?Math.round((totalGreens/validos)*100):0;
