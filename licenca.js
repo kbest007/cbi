@@ -5,8 +5,8 @@
 
 const ADMIN_EMAIL = 'cbest07@gmail.com';
 const TRIAL_DIAS  = 7;
-const SUPA_URL    = 'https://tjzcgfjdhunqfifxgyyy.supabase.co';
-const SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg';
+const _LIC_SUPA_URL = 'https://tjzcgfjdhunqfifxgyyy.supabase.co';
+const _LIC_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqemNnZmpkaHVucWZpZnhneXl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUxMDUsImV4cCI6MjA5NTc2MTEwNX0.JJYKvSn_VOdWwhfe37diLBJ5ngF4NQvhwrnCwKokzRg';
 
 // ----------------------------------------------------------------
 // Helpers internos
@@ -24,7 +24,7 @@ function dataExpiracaoPara(dias) {
 
 async function supaFetch(path, method = 'GET', body = null) {
   // Usa o token real do usuário logado se disponível, senão cai na anon key
-  let token = SUPA_KEY;
+  let _LIC_TOKEN = _LIC_SUPA_KEY;
   try {
     const sbKey = 'sb-tjzcgfjdhunqfifxgyyy-auth-token';
     const raw = localStorage.getItem(sbKey);
@@ -37,14 +37,14 @@ async function supaFetch(path, method = 'GET', body = null) {
   const opts = {
     method,
     headers: {
-      'apikey': SUPA_KEY,
+      'apikey': _LIC_SUPA_KEY,
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     }
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(SUPA_URL + '/rest/v1/' + path, opts);
+  const res = await fetch(_LIC_SUPA_URL + '/rest/v1/' + path, opts);
   const text = await res.text();
   if (!res.ok) throw new Error(text);
   return text ? JSON.parse(text) : null;
