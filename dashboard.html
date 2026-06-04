@@ -200,10 +200,16 @@ body{ background:#020617; color:white; min-height:100vh; }
 // ================================================================
 //  GESTÃO DE BANCA
 // ================================================================
-function salvarBancaInicial(){
+async function salvarBancaInicial(){
   let valor=document.getElementById('inputBancaInicial').value;
-  if(valor){ localStorage.setItem('bancaInicial',valor); location.reload(); }
-  else alert('Por favor, informe um valor válido para a banca inicial.');
+  if(!valor) { alert('Por favor, informe um valor válido para a banca inicial.'); return; }
+  const user = window.CBI_DB.getSessionUser();
+  const email = localStorage.getItem('cbi_email_sessao') || '';
+  if(user && user.id) {
+    try { await window.CBI_DB.salvarPerfil(user.id, email, parseFloat(valor)); } catch(e) { console.warn('Erro ao salvar banca no Supabase:', e); }
+  }
+  localStorage.setItem('bancaInicial', valor);
+  location.reload();
 }
 
 async function gerenciarBanca(tipo){
@@ -278,7 +284,14 @@ async function calcularEAtualizarDashboard(){
       }
     }
 
+    // Tenta carregar banca do Supabase, fallback para localStorage
     let BANCA_INICIAL = parseFloat(localStorage.getItem('bancaInicial')||'0');
+    if(user && user.id) {
+      try {
+        const perfil = await window.CBI_DB.getPerfil(user.id);
+        if(perfil && perfil.saldo_inicial) BANCA_INICIAL = parseFloat(perfil.saldo_inicial) || BANCA_INICIAL;
+      } catch(e) { /* usa localStorage */ }
+    }
     if(document.getElementById('inputBancaInicial')) document.getElementById('inputBancaInicial').placeholder='Banca Atual: R$ '+BANCA_INICIAL.toFixed(2);
     let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
     operacoes.forEach(op=>{

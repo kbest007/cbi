@@ -309,6 +309,9 @@ mensagem(error.message,'error')
 return
 }
 
+// Salva email na sessão para o restante do sistema
+localStorage.setItem('cbi_email_sessao', email.trim().toLowerCase())
+
 mensagem('Login realizado com sucesso!','success')
 
 setTimeout(()=>{
