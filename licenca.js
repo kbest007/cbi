@@ -23,11 +23,22 @@ function dataExpiracaoPara(dias) {
 }
 
 async function supaFetch(path, method = 'GET', body = null) {
+  // Usa o token real do usuário logado se disponível, senão cai na anon key
+  let token = SUPA_KEY;
+  try {
+    const sbKey = 'sb-tjzcgfjdhunqfifxgyyy-auth-token';
+    const raw = localStorage.getItem(sbKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.access_token) token = parsed.access_token;
+    }
+  } catch(e) {}
+
   const opts = {
     method,
     headers: {
       'apikey': SUPA_KEY,
-      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     }

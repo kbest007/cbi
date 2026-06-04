@@ -130,15 +130,69 @@ function renderizar(lista) {
             <td>${new Date(op.data).toLocaleDateString('pt-BR')}</td>
             <td>${op.descricao || ''}</td>
             <td>${op.tiro}</td>
-            <td style="color:${op.resultadoFinal >= 0 ? 'var(--green)' : 'var(--red)'}">${Number(op.resultadoFinal).toFixed(2)}</td>
+            <td style="color:${op.resultadoFinal >= 0 ? 'var(--green)' : 'var(--red)'}">R$ ${Number(op.resultadoFinal).toFixed(2).replace('.', ',')}</td>
             <td><button class="btn-red" style="padding:5px 10px" onclick="deletar('${op.id}')">Excluir</button></td>
         </tr>`;
     });
 
-    // Atualiza KPIs
-    let lucro = lista.reduce((s,o) => s + o.resultadoFinal, 0);
-    document.getElementById('kpiLucro').textContent = `R$ ${lucro.toFixed(2)}`;
-    document.getElementById('kpiTotal').textContent = lista.length;
+    // Filtra só operações reais (ignora aportes/saques para win rate)
+    const opReais = lista.filter(o => o.tiro !== 'Aporte' && o.tiro !== 'Saque');
+    const greens  = opReais.filter(o => o.tiro && o.tiro.toLowerCase().includes('green'));
+    const winRate = opReais.length > 0 ? Math.round((greens.length / opReais.length) * 100) : 0;
+
+    // Lucro total de todas
+    let lucro = lista.reduce((s,o) => s + (Number(o.resultadoFinal) || 0), 0);
+    const sinal = lucro >= 0 ? '+' : '-';
+    document.getElementById('kpiLucro').textContent = `${sinal}R$ ${Math.abs(lucro).toFixed(2).replace('.', ',')}`;
+    document.getElementById('kpiLucro').style.color = lucro >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('kpiWinRate').textContent = winRate + '%';
+    document.getElementById('kpiWinRate').style.color = winRate >= 50 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('kpiTotal').textContent = opReais.length;
+
+    // Gráfico de evolução de banca
+    renderGraficos(lista);
+}
+
+let chartEvolucao = null;
+let chartResultados = null;
+
+function renderGraficos(lista) {
+    const ordenada = [...lista].sort((a,b) => new Date(a.data) - new Date(b.data));
+    
+    // Gráfico evolução acumulada
+    let acumulado = 0;
+    const labels = ordenada.map((op, i) => '#' + (i+1));
+    const valores = ordenada.map(op => { acumulado += Number(op.resultadoFinal); return parseFloat(acumulado.toFixed(2)); });
+
+    const ctx1 = document.getElementById('chartEvolucao');
+    if (ctx1) {
+        if (chartEvolucao) chartEvolucao.destroy();
+        chartEvolucao = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{ label: 'Lucro Acumulado (R$)', data: valores, borderColor: '#00e5a0', backgroundColor: 'rgba(0,229,160,0.08)', tension: 0.4, fill: true, pointRadius: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
+        });
+    }
+
+    // Gráfico pizza resultados
+    const greens = lista.filter(o => o.tiro && o.tiro.toLowerCase().includes('green')).length;
+    const reds   = lista.filter(o => o.tiro === 'RED').length;
+    const outros = lista.length - greens - reds;
+    const ctx2 = document.getElementById('chartResultados');
+    if (ctx2) {
+        if (chartResultados) chartResultados.destroy();
+        chartResultados = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Greens', 'Reds', 'Outros'],
+                datasets: [{ data: [greens, reds, outros], backgroundColor: ['#00e5a0', '#ff4d6d', '#3b82f6'], borderWidth: 0 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+        });
+    }
 }
 
 function filtrarPorData() {
