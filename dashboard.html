@@ -163,17 +163,20 @@ body{ background:#020617; color:white; min-height:100vh; }
     return;
   }
 
-  const ADMIN_EMAIL = window.CBI_LICENCA.ADMIN_EMAIL;
-  document.getElementById('userLabel').textContent = email===ADMIN_EMAIL ? '👑 Administrador' : email.split('@')[0];
+  const ADMIN_EMAIL = (window.CBI_LICENCA.ADMIN_EMAIL || '').trim().toLowerCase();
+  const emailNorm   = (email || '').trim().toLowerCase();
+  const isAdmin     = emailNorm === ADMIN_EMAIL;
 
-  if(email===ADMIN_EMAIL){
+  document.getElementById('userLabel').textContent = isAdmin ? '👑 Administrador' : email.split('@')[0];
+
+  if(isAdmin){
     document.getElementById('painelAdmin').style.display='block';
-    window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
-    calcularEAtualizarDashboard();
+    await window.CBI_LICENCA.renderizarPainelAdmin('licencaAdminContainer');
+    await calcularEAtualizarDashboard();
     return;
   }
 
-  const lic = await window.CBI_LICENCA.verificarLicenca(email);
+  const lic = await window.CBI_LICENCA.verificarLicenca(emailNorm);
   if(!lic.ativa){
     window.CBI_LICENCA.mostrarTelaAcessoBloqueado
       ? window.CBI_LICENCA.mostrarTelaAcessoBloqueado(email, lic.motivo, lic.tipo)
