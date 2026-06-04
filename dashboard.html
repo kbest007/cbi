@@ -194,6 +194,9 @@ body{ background:#020617; color:white; min-height:100vh; }
     : label+' — <strong>'+lic.restam+' dia(s)</strong> restante(s)';
   aviso.style.display='block';
   aviso.innerHTML='<div style="background:'+bg+';border:1px solid '+bor+';border-radius:14px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;"><span style="color:'+cor+';font-size:14px;font-weight:600;">'+msgt+'</span>'+(urgente?'<span style="color:#64748b;font-size:12px;">Contate o administrador para renovação.</span>':'')+'</div>';
+
+  // Carrega dados do dashboard para usuários normais também
+  await calcularEAtualizarDashboard();
 })();
 
 // ================================================================
@@ -253,7 +256,7 @@ async function logout(){
   }
 }
 
-document.addEventListener('DOMContentLoaded', calcularEAtualizarDashboard);
+// calcularEAtualizarDashboard é chamado pelo init() — não precisa do DOMContentLoaded separado
 
 async function calcularEAtualizarDashboard(){
   try{
