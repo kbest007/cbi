@@ -245,10 +245,17 @@ button:hover, .btn-link-action:hover { opacity: 0.88; }
     <div class="card-title">Opcionais</div>
     <div class="dist-bar">
       <div class="wrap">
-        <label>Dividir por igual (R$)</label>
-        <input type="number" id="stakeDistribuir" placeholder="Ex: 40.00">
+        <label>Valor a distribuir (R$)</label>
+        <input type="number" id="stakeDistribuir" placeholder="Ex: 55.00">
       </div>
-      <button class="btn-blue btn-sm" onclick="distribuirIgual()">Distribuir</button>
+      <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end;">
+        <button class="btn-blue btn-sm" onclick="distribuirIgual()">Dividir para Todos</button>
+        <button class="btn-green btn-sm" onclick="distribuirSelecionados()">Dividir para Selecionados</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end;">
+        <button class="btn-gray btn-sm" onclick="selecionarTodos()">✅ Selecionar Todos</button>
+        <button class="btn-gray btn-sm" onclick="deselecionarTodos()">☐ Desmarcar Todos</button>
+      </div>
       <span id="distInfo"></span>
     </div>
     <div class="opc-grid" id="opcionais"></div>
@@ -304,7 +311,7 @@ button:hover, .btn-link-action:hover { opacity: 0.88; }
 })();
 // ─────────────────────────────────────────────────────────────────
 
-var MERCADOS = ['4x0','0x4','+5 Gols','3x3','3x2','2x3','5+ Casa','5+ Fora'];
+var MERCADOS = ['4x0','0x4','+5 Gols','Qualquer outro resultado','3x2','2x3','5+ Casa','5+ Fora','2x2','3x1','1x3','4 Gols Casa','4 Gols Fora','Qualquer outro Casa','Qualquer outro Fora'];
 var resPrincipal  = 0;
 var resOpcionais  = 0;
 var opc           = {};
@@ -332,7 +339,13 @@ document.addEventListener('DOMContentLoaded', function() {
         card.className = 'opc-card';
         card.id = 'opc_' + i;
         card.innerHTML =
-          '<div class="opc-nome">' + nome + '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+            '<div class="opc-nome" style="margin-bottom:0">' + nome + '</div>' +
+            '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--mono);">' +
+              '<input type="checkbox" id="sel_' + i + '" style="width:14px;height:14px;cursor:pointer;accent-color:var(--green);">' +
+              'Selec.' +
+            '</label>' +
+          '</div>' +
           '<div class="opc-inputs">' +
             '<div><label>Stake</label><input type="number" placeholder="0.00" id="stake_' + i + '"></div>' +
             '<div><label>Odd</label><input type="number" placeholder="1.00" step="0.01" id="odd_' + i + '"></div>' +
@@ -401,7 +414,40 @@ function distribuirIgual() {
   }
   var elDist = document.getElementById('distInfo');
   if (elDist) elDist.textContent = 'R$ ' + por.toFixed(2) + ' por opcional (' + MERCADOS.length + 'x)';
-  toast('Stakes distribuídos!');
+  toast('Stakes distribuídos para todos!');
+}
+
+function distribuirSelecionados() {
+  var total = num('stakeDistribuir');
+  if (!total) { toast('Informe o valor!', 'red'); return; }
+  var selecionados = [];
+  for (var i = 0; i < MERCADOS.length; i++) {
+    var chk = document.getElementById('sel_' + i);
+    if (chk && chk.checked) selecionados.push(i);
+  }
+  if (selecionados.length === 0) { toast('Selecione pelo menos 1 opcional!', 'red'); return; }
+  var por = total / selecionados.length;
+  for (var j = 0; j < selecionados.length; j++) {
+    var el = document.getElementById('stake_' + selecionados[j]);
+    if (el) el.value = por.toFixed(2);
+  }
+  var elDist = document.getElementById('distInfo');
+  if (elDist) elDist.textContent = 'R$ ' + por.toFixed(2) + ' por opcional (' + selecionados.length + 'x selecionados)';
+  toast('Stakes distribuídos para ' + selecionados.length + ' selecionados!');
+}
+
+function selecionarTodos() {
+  for (var i = 0; i < MERCADOS.length; i++) {
+    var chk = document.getElementById('sel_' + i);
+    if (chk) chk.checked = true;
+  }
+}
+
+function deselecionarTodos() {
+  for (var i = 0; i < MERCADOS.length; i++) {
+    var chk = document.getElementById('sel_' + i);
+    if (chk) chk.checked = false;
+  }
 }
 
 function atualizar() {
