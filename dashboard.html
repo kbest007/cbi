@@ -102,6 +102,7 @@ body{ background:#020617; color:white; min-height:100vh; }
     <div class="card"><div class="card-title">Green 1º Tiro</div><div class="card-value green" id="green1">0</div></div>
     <div class="card"><div class="card-title">Green 2º Tiro</div><div class="card-value green" id="green2">0</div></div>
     <div class="card"><div class="card-title">Green 3º Tiro</div><div class="card-value green" id="green3">0</div></div>
+    <div class="card"><div class="card-title">Green 4º Tiro</div><div class="card-value green" id="green4">0</div></div>
     <div class="card"><div class="card-title">Reds Acumulados</div><div class="card-value red" id="reds">0</div></div>
   </div>
 
@@ -293,19 +294,19 @@ async function calcularEAtualizarDashboard(){
       } catch(e) { /* usa localStorage */ }
     }
     if(document.getElementById('inputBancaInicial')) document.getElementById('inputBancaInicial').placeholder='Banca Atual: R$ '+BANCA_INICIAL.toFixed(2);
-    let lucroTotal=0,green1=0,green2=0,green3=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
+    let lucroTotal=0,green1=0,green2=0,green3=0,green4=0,reds=0,reembolsos=0,resPrincipal=0,resOpcionais=0,opValidas=0;
     operacoes.forEach(op=>{
       lucroTotal+=op.resultadoFinal||0; resPrincipal+=op.resultadoPrincipal||0; resOpcionais+=op.resultadoOpcionais||0;
-      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;} else if(op.tiro==='Aporte'||op.tiro==='Saque'){/* ignora na contagem */}
+      if(op.tiro==='Green 1º Tiro'){green1++;opValidas++;} else if(op.tiro==='Green 2º Tiro'){green2++;opValidas++;} else if(op.tiro==='Green 3º Tiro'){green3++;opValidas++;} else if(op.tiro==='Green 4º Tiro'){green4++;opValidas++;} else if(op.tiro==='RED'){reds++;opValidas++;} else if(op.tiro==='Reembolso'){reembolsos++;opValidas++;} else if(op.tiro==='Aporte'||op.tiro==='Saque'){/* ignora na contagem */}
     });
-    let totalGreens=green1+green2+green3, validos=opValidas-reembolsos;
+    let totalGreens=green1+green2+green3+green4, validos=opValidas-reembolsos;
     let assertividade=validos>0?Math.round((totalGreens/validos)*100):0;
     let saldoAtual=BANCA_INICIAL+lucroTotal, roi=BANCA_INICIAL>0?Math.round((lucroTotal/BANCA_INICIAL)*100):0;
     setVal('saldoAtual',saldoAtual,false); setVal('lucroTotal',lucroTotal,true);
     document.getElementById('totalOperacoes').textContent=opValidas;
     document.getElementById('assertividade').textContent=assertividade+'%';
     document.getElementById('green1').textContent=green1; document.getElementById('green2').textContent=green2;
-    document.getElementById('green3').textContent=green3; document.getElementById('reds').textContent=reds;
+    document.getElementById('green3').textContent=green3; document.getElementById('green4').textContent=green4; document.getElementById('reds').textContent=reds;
     setVal('resultadoPrincipal',resPrincipal,false); setVal('resultadoOpcionais',resOpcionais,false); setVal('resultadoFinal',lucroTotal,false);
     let elRoi=document.getElementById('roi'); elRoi.textContent=(roi>=0?'+':'')+roi+'%'; elRoi.className='card-value '+(roi>=0?'green':'red');
     renderFeed(operacoes);
